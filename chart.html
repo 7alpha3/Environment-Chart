@@ -68,7 +68,8 @@
 	        avgHumid = sumHumid/(i+1);
 	        sumTemp += parseFloat(row.temp);
 		  
-		alert("temp " + results[0].Field3);
+		alert("temp " + parseFloat(results[0].temp));
+		alert("temp " + parseFloat(results[0].field3));
 	        if (i < 12)
 	        {
 	            avgTemp = 0;
