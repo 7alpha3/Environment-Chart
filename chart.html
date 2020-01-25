@@ -10,6 +10,10 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src="https://www.google.com/jsapi"></script>
     <script src="https://www.gstatic.com/charts/loader.js"></script>
+	  
+
+      google.charts.load('current', {'packages':['table']});
+      google.charts.setOnLoadCallback(drawTable);
     
 
     <!-- EXAMPLE SCRIPT -->
@@ -191,7 +195,7 @@
       //google.charts.load('current', {packages: ['corechart']});
 
       // call drawChart once google charts is loaded
-      google.setOnLoadCallback(drawChart);
+      google.charts.setOnLoadCallback(drawChart);
       setInterval(drawChart, 10000);
       
       
@@ -246,7 +250,7 @@
       
         });
       }
-      google.setOnLoadCallback(drawTable);
+      google.charts.setOnLoadCallback(drawTable);
       setInterval(drawTable, 10000);
 
       function onFrameSelect()
