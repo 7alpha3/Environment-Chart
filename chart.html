@@ -55,6 +55,28 @@
 		alert(results.field1);
 		});
 		});
+
+	     
+	     // get the data with a webservice call
+$.getJSON('http://api.thingspeak.com/channels/345722/feed/last.json?callback=?', function(data) {
+
+		// if the field1 has data update the page
+		if (data.field1) {
+			console.log(data);
+			alert(data.field1);
+		    $("#color1").css("background", data.field1);
+		    $("#color2").css("background", data.field2);
+		    $("#color3").css("background", data.field3);
+		    $("#color4").css("background", data.field4);
+		    //$("#color5").css("background", data.field5);
+		    //$("#color6").css("background", data.field6);
+		    //$("#color7").css("background", data.field7);
+		    //$("#color8").css("background", data.field8);
+		    //$("#credits").css("background", data.field8);
+
+			}
+
+		});
   
          // JSONP request
          var jsonData = $.ajax({
