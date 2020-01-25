@@ -58,7 +58,7 @@
 
 	     
 	     // get the data with a webservice call
-$.getJSON('http://api.thingspeak.com/channels/345722/feed/last.json?callback=?', function(data) {
+$.getJSON('https://api.thingspeak.com/channels/345722/feeds.jsonapi_key=NHUR2H1DK7FOXI24&field1&results=3?callback=?', function(data) {
 
 		// if the field1 has data update the page
 		if (data.field1) {
