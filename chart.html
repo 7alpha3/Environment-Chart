@@ -40,44 +40,27 @@
 	 //alert("drawChart()");
 	     
          if (gate == false) return;
-	 $.getJSON('https://api.thingspeak.com/channels/345722/feed.json?results=3?callback=?', function(result) {
-		console.log(result);
-		$.each(result, function(i, field){
-		$("div").append(field + " ");
-		alert(field);
-		});
-		});
-
-	$.getJSON('https://api.thingspeak.com/channels/345722/feeds.jsonapi_key=NHUR2H1DK7FOXI24&field1&results=5?callback=?', function(result) {
-		console.log(result);
-		$.each(result, function(i, field){
-		$("div").append(field + " ");
-		alert(results.field1);
-		});
-		});
-
+	 
 	     
-	     // get the data with a webservice call
-$.getJSON('https://api.thingspeak.com/channels/345722/feeds.jsonapi_key=NHUR2H1DK7FOXI24&field1&results=3?callback=?', function(data) {
-
-		// if the field1 has data update the page
-		if (data.field1) {
-			console.log(data);
-			alert(data.field1);
-		    $("#color1").css("background", data.field1);
-		    $("#color2").css("background", data.field2);
-		    $("#color3").css("background", data.field3);
-		    $("#color4").css("background", data.field4);
-		    //$("#color5").css("background", data.field5);
-		    //$("#color6").css("background", data.field6);
-		    //$("#color7").css("background", data.field7);
-		    //$("#color8").css("background", data.field8);
-		    //$("#credits").css("background", data.field8);
-
-			}
-
-		});
-  
+	 $.ajax({
+	    url: " https://api.thingspeak.com/channels/345722/feeds.json?results=2",
+	   dataType: "json",
+	   cache: false,
+	   error: function(xhr, ajaxOptions, thrownError) {
+	   debugger;
+	   alert(xhr.statusText);
+	   alert(thrownError);
+	   },
+	   success: function(json1) {
+	   console.log(json1);
+	   json1.feeds.forEach(function(feed, i) {
+		 alert(feed.field1);   
+	  console.log("\n The deails of " + i + "th Object are :  \nCreated_at: " + feed.created_at + "\nEntry_id:" + feed.entry_id + "\nField1:" + feed.field1 + "\nField2:" + feed.field2);
+	});
+	     
+	     
+	     
+	     
          // JSONP request
          var jsonData = $.ajax({
          
