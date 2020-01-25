@@ -41,6 +41,18 @@
 	     
          if (gate == false) return;
 
+	     
+	     $.getJSON('https://api.thingspeak.com/channels/345722/feeds.jsonapi_key=NHUR2H1DK7FOXI24&field1&results=50?callback=?', function(result) {
+console.log(result);
+$.each(result, function(i, field){
+$("div").append(field + " ");
+});
+});
+});
+});
+	     
+	     
+	     
          // JSONP request
          var jsonData = $.ajax({
          
