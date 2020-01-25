@@ -1,292 +1,297 @@
-< !DOCTYPE html >
-    <html>
-        <head>
-            <title>Environment Chart</title>
-            <meta http-equiv='refresh' content='600'>
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Environment Chart</title>
+    <meta http-equiv='refresh' content='600'>
+        
+    <!-- EXTERNAL LIBS-->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://www.google.com/jsapi">
+    
+	  
 
-            <!-- EXTERNAL LIBS-->
-            <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-            <script type="text/javascript"></script>
-            <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-            <script src="https://www.google.com/jsapi">
+      
 
-            <!-- EXAMPLE SCRIPT -->
-                  
-            //google.charts.load('current', {'packages':['table']});
-            google.charts.load('current', {'packages':['corechart','table']});
-            google.charts.setOnLoadCallback(drawChart);
-            google.charts.setOnLoadCallback(drawTable);
-               
-            //google.charts.load('current', {'packages':['table']});
-            //google.charts.setOnLoadCallback(drawTable);
-               
-                    setInterval(drawChart, 10000);
-                    setInterval(drawTable, 10000);
-                  
-                    //alert("START");
-                    var public_key = 'KJn6ywN5K1FM2dGlazjl';
-                    var gate = false;
-                    var parameters = location.search.substring(1).split("&");
-                    //alert(parameters);
-                    var pageParam = parameters[1].split("=");
-                    //alert("pageParam "+ pageParam[1]);
-               
-                    var temp = parameters[0].split("=");
-                    //alert("temp " +temp[1]);
-                  
-               
-                if(temp[1] == '2202')
-                {
-                    gate = true;
-                }
-                else
-                {
-                    gate = false;
-                }
-              
-               // onload callback
-               function drawChart()
+    <!-- EXAMPLE SCRIPT -->
+   
+     //google.charts.load('current', {'packages':['table']});
+     google.charts.load('current', {'packages':['corechart','table']});
+     google.charts.setOnLoadCallback(drawChart);
+     google.charts.setOnLoadCallback(drawTable);
+
+     //google.charts.load('current', {'packages':['table']});
+     //google.charts.setOnLoadCallback(drawTable);
+
+     setInterval(drawChart, 10000);
+     setInterval(drawTable, 10000);
+    
+     //alert("START");
+     var public_key = 'KJn6ywN5K1FM2dGlazjl';
+     var gate = false;
+     var parameters = location.search.substring(1).split("&");
+     //alert(parameters);
+     var pageParam = parameters[1].split("=");  
+     //alert("pageParam "+ pageParam[1]);
+
+     var temp = parameters[0].split("=");  
+     //alert("temp " +temp[1]);
+    
+
+     if(temp[1] == '2202')
+     {
+          gate = true;
+     } 
+     else
+     {
+          gate = false;
+     }
+     
+     // onload callback
+     function drawChart()
      {
 	 //alert("drawChart()");
 	     
          if (gate == false) return;
-               
-                   
+	 
+	     
 	 $.ajax({
-                        url: 'https://api.thingspeak.com/channels/345722/feeds.json?api_key=NHUR2H1DK7FOXI24&results=2',
-                  dataType: "json",
-                  cache: false,
+	     url: 'https://api.thingspeak.com/channels/345722/feeds.json?api_key=NHUR2H1DK7FOXI24&results=2',
+	   dataType: "json",
+	   cache: false,
 	   error: function(xhr, ajaxOptions, thrownError) {
 	   debugger;
-                    alert(xhr.statusText);
-                    alert(thrownError);
-                    },
+	   alert(xhr.statusText);
+	   alert(thrownError);
+	   },
 	   success: function(json1) {
-                        console.log(json1);
+	   console.log(json1);
 	   json1.feeds.forEach(function(feed, i) {
-                        alert(feed.field1);
-                 console.log("\n The deails of " + i + "th Object are :  \nCreated_at: " + feed.created_at + "\nEntry_id:" + feed.entry_id + "\nField1:" + feed.field1 + "\nField2:" + feed.field2);
-               });
-                   
-                   
-                   
-                   
-                    // JSONP request
+		 alert(feed.field1);   
+	  console.log("\n The deails of " + i + "th Object are :  \nCreated_at: " + feed.created_at + "\nEntry_id:" + feed.entry_id + "\nField1:" + feed.field1 + "\nField2:" + feed.field2);
+	});
+	     
+	     
+	     
+	     
+         // JSONP request
          var jsonData = $.ajax({
+         
+	 //url: 'https://api.thingspeak.com/channels/345722/feeds.json?api_key=6GKXEBQK5KNGHY7A&results=50,callback=results',
+	 url: 'https://api.thingspeak.com/channels/345722/feeds.json?api_key=NHUR2H1DK7FOXI24&field1&results=50,callback=results',
 
-                        //url: 'https://api.thingspeak.com/channels/345722/feeds.json?api_key=6GKXEBQK5KNGHY7A&results=50,callback=results',
-                        url: 'https://api.thingspeak.com/channels/345722/feeds.json?api_key=NHUR2H1DK7FOXI24&field1&results=50,callback=results',
-               
          //data: {page: "1"},
 	     data: {page:pageParam[1]},
-                    dataType: 'jsonp',
+         dataType: 'jsonp',
          }).done(function (results) {
           var data = new google.visualization.DataTable();
-                    data.addColumn('datetime', 'field1');
-                    data.addColumn('number', 'field2 ' + parseFloat(feeds[0].field2).toFixed(2) + '°F');
-                    data.addColumn('number', 'field3' + parseFloat(feeds[0].field3).toFixed(2) + '°F');
-                    data.addColumn('number', 'field4' + parseFloat(feeds[0].field4).toFixed(2) + '%');
-                    //data.addColumn('number', 'Avg Temp ' + '°F');
-                    //data.addColumn('number', 'Avg Humidity ' + '%');
-          
-                    var avgTemp = 0.00;
-                    var sumTemp = 0.00;
-                    var avgDP = 0.0;
-                    var sumDP = 0.0;
-                    var avgHumid = 0.0;
-                      var sumHumid = 0.0;
+          data.addColumn('datetime', 'field1');
+          data.addColumn('number', 'field2 ' + parseFloat(feeds[0].field2).toFixed(2) + '°F');		
+	      data.addColumn('number', 'field3' + parseFloat(feeds[0].field3).toFixed(2) + '°F');
+          data.addColumn('number', 'field4' + parseFloat(feeds[0].field4).toFixed(2) + '%');
+	      //data.addColumn('number', 'Avg Temp ' + '°F');
+	      //data.addColumn('number', 'Avg Humidity ' + '%');
+
+	      var avgTemp = 0.00;
+	      var sumTemp = 0.00;
+	      var avgDP = 0.0;
+          var sumDP = 0.0;
+	      var avgHumid = 0.0;
+ 	      var sumHumid = 0.0;	
           $.each(results, function (i, row) {
-                        sumDP += parseFloat(row.dewpoint);
-                    avgDP = sumDP/(i+1);
-                    sumHumid += parseFloat(row.humidity);
-                    avgHumid = sumHumid/(i+1);
-                    sumTemp += parseFloat(row.temp);
-                 
-                alert("temp " + parseFloat(results[0].temp));
-                alert("temp " + parseFloat(results[0].field3));
+            sumDP += parseFloat(row.dewpoint);
+            avgDP = sumDP/(i+1);
+	        sumHumid += parseFloat(row.humidity);
+	        avgHumid = sumHumid/(i+1);
+	        sumTemp += parseFloat(row.temp);
+		  
+		alert("temp " + parseFloat(results[0].temp));
+		alert("temp " + parseFloat(results[0].field3));
 	        if (i < 12)
 	        {
-                        avgTemp = 0;
-                    subTemp = 0;
-		        if(results[0]){avgTemp += parseFloat(results[0].temp); subTemp = avgTemp/1;}
- 		        if(results[1]){avgTemp += parseFloat(results[1].temp); subTemp = avgTemp/2;}
-		        if(results[2]){avgTemp += parseFloat(results[2].temp); subTemp = avgTemp/3;}
- 		        if(results[3]){avgTemp += parseFloat(results[3].temp); subTemp = avgTemp/4;}
-		        if(results[4]){avgTemp += parseFloat(results[4].temp); subTemp = avgTemp/5;}
-		        if(results[5]){avgTemp += parseFloat(results[5].temp); subTemp = avgTemp/6;}
-		        if(results[6]){avgTemp += parseFloat(results[6].temp); subTemp = avgTemp/7;}
- 		        if(results[7]){avgTemp += parseFloat(results[7].temp); subTemp = avgTemp/8;}
-		        if(results[8]){avgTemp += parseFloat(results[8].temp); subTemp = avgTemp/9;}
- 		        if(results[9]){avgTemp += parseFloat(results[9].temp); subTemp = avgTemp/10;}
-		        if(results[10]){avgTemp += parseFloat(results[10].temp); subTemp = avgTemp/11;}
-		        if(results[11]){avgTemp += parseFloat(results[11].temp); subTemp = avgTemp/12;}
-                    avgTemp = subTemp;
-                }else
+	            avgTemp = 0;
+                subTemp = 0;
+		        if(results[0]){ avgTemp += parseFloat(results[0].temp); subTemp = avgTemp/1;}
+ 		        if(results[1]){ avgTemp += parseFloat(results[1].temp); subTemp = avgTemp/2;}
+		        if(results[2]){ avgTemp += parseFloat(results[2].temp); subTemp = avgTemp/3;}
+ 		        if(results[3]){ avgTemp += parseFloat(results[3].temp); subTemp = avgTemp/4;}
+		        if(results[4]){ avgTemp += parseFloat(results[4].temp); subTemp = avgTemp/5;}
+		        if(results[5]){ avgTemp += parseFloat(results[5].temp); subTemp = avgTemp/6;}
+		        if(results[6]){ avgTemp += parseFloat(results[6].temp); subTemp = avgTemp/7;}
+ 		        if(results[7]){ avgTemp += parseFloat(results[7].temp); subTemp = avgTemp/8;}
+		        if(results[8]){ avgTemp += parseFloat(results[8].temp); subTemp = avgTemp/9;}
+ 		        if(results[9]){ avgTemp += parseFloat(results[9].temp); subTemp = avgTemp/10;}
+		        if(results[10]){ avgTemp += parseFloat(results[10].temp); subTemp = avgTemp/11;}
+		        if(results[11]){ avgTemp += parseFloat(results[11].temp); subTemp = avgTemp/12;}
+		        avgTemp = subTemp;
+            }else
 	        {
-                        avgTemp = sumTemp / (i + 1);
-                }
-    
+	            avgTemp = sumTemp/(i+1);
+	        }
+
 	        if( i < 12 )
 	        {
-                        avgHumid = 0;
-                    subHumid = 0;
-		        if(results[0]){avgHumid += parseFloat(results[0].humidity); subHumid = avgHumid/1;}
- 		        if(results[1]){avgHumid += parseFloat(results[1].humidity); subHumid = avgHumid/2;}
-		        if(results[2]){avgHumid += parseFloat(results[2].humidity); subHumid = avgHumid/3;}
- 		        if(results[3]){avgHumid += parseFloat(results[3].humidity); subHumid = avgHumid/4;}
-		        if(results[4]){avgHumid += parseFloat(results[4].humidity); subHumid = avgHumid/5;}
-		        if(results[5]){avgHumid += parseFloat(results[5].humidity); subHumid = avgHumid/6;}
-		        if(results[6]){avgHumid += parseFloat(results[6].humidity); subHumid = avgHumid/7;}
- 		        if(results[7]){avgHumid += parseFloat(results[7].humidity); subHumid = avgHumid/8;}
-		        if(results[8]){avgHumid += parseFloat(results[8].humidity); subHumid = avgHumid/9;}
- 		        if(results[9]){avgHumid += parseFloat(results[9].humidity); subHumid = avgHumid/10;}
-		        if(results[10]){avgHumid += parseFloat(results[10].humidity); subHumid = avgHumid/11;}
-		        if(results[11]){avgHumid += parseFloat(results[11].humidity); subHumid = avgHumid/12;}
-                    avgHumid = subHumid;
-                }
-    
-            
-                data.addRow([
-                    (new Date(row.timestamp)),
-                    parseFloat(row.temp),
-                    parseFloat(row.dewpoint),
-                    parseFloat(row.humidity),
-                    parseFloat(avgTemp),
-                    parseFloat(avgHumid)
-                ]);
-                });
-                data.setColumnLabel(4, 'Avg Temp ' + avgTemp.toFixed(2) + '°F');
-                data.setColumnLabel(5, 'Avg Humid ' + avgHumid.toFixed(2) + '%');
-                var formatter = new google.visualization.NumberFormat(
-      	    {fractionDigits: 2 });
-                formatter.format(data, 0);
-                formatter.format(data, 1);
-                formatter.format(data, 2);
-                formatter.format(data, 3);
-                formatter.format(data, 4);
-                formatter.format(data, 5);
-    
-	  var options = {
-                        title: 'Environment Chart ' + 'Frame ' + pageParam[1] + ' - ' + new Date(results[0].timestamp).toLocaleDateString() + " at " + new Date(results[0].timestamp).toLocaleTimeString() + "\n\n" + "Avg Temp - " + avgTemp.toFixed(2) + ", " + "Avg Dew 			Point - " + avgDP.toFixed(2) + ", " + "Avg Humidity - " + avgHumid.toFixed(2),
-                    height: 900,
-                curveType: 'function',
-          series: {
-                        0: {color: '#6f9654' },
-            1: {color: '#1c91c0' },
-	    2: {color: '#e19999' },
-	    3: {color: '#ffff00' },
-	    4: {color: '#F2D4D4' },
-                        },
-	    vAxis: {
-                        title: "Temp, Dew Point, Humidity",
-                    viewWindowMode:'explicit',
-              viewWindow:{
-                        max:90,
-                    min:30
-                  }
-                }
-              };
-    
-              var chart = new google.visualization.LineChart($('#chart').get(0));
-    
-              chart.draw(data, options );
-    
+		        avgHumid = 0;
+                subHumid = 0;
+		        if(results[0]){ avgHumid += parseFloat(results[0].humidity); subHumid = avgHumid/1;}
+ 		        if(results[1]){ avgHumid += parseFloat(results[1].humidity); subHumid = avgHumid/2;}
+		        if(results[2]){ avgHumid += parseFloat(results[2].humidity); subHumid = avgHumid/3;}
+ 		        if(results[3]){ avgHumid += parseFloat(results[3].humidity); subHumid = avgHumid/4;}
+		        if(results[4]){ avgHumid += parseFloat(results[4].humidity); subHumid = avgHumid/5;}
+		        if(results[5]){ avgHumid += parseFloat(results[5].humidity); subHumid = avgHumid/6;}
+		        if(results[6]){ avgHumid += parseFloat(results[6].humidity); subHumid = avgHumid/7;}
+ 		        if(results[7]){ avgHumid += parseFloat(results[7].humidity); subHumid = avgHumid/8;}
+		        if(results[8]){ avgHumid += parseFloat(results[8].humidity); subHumid = avgHumid/9;}
+ 		        if(results[9]){ avgHumid += parseFloat(results[9].humidity); subHumid = avgHumid/10;}
+		        if(results[10]){ avgHumid += parseFloat(results[10].humidity); subHumid = avgHumid/11;}
+		        if(results[11]){ avgHumid += parseFloat(results[11].humidity); subHumid = avgHumid/12;}
+		        avgHumid = subHumid;
+            }
+
+	     
+            data.addRow([
+                (new Date(row.timestamp)),
+                parseFloat(row.temp),
+	            parseFloat(row.dewpoint),
+                parseFloat(row.humidity),
+	            parseFloat(avgTemp),
+	            parseFloat(avgHumid)
+            ]);
             });
-          }
-    
-    
-          // load chart lib
+	        data.setColumnLabel(4, 'Avg Temp ' + avgTemp.toFixed(2) + '°F');
+	        data.setColumnLabel(5, 'Avg Humid ' + avgHumid.toFixed(2) + '%');
+            var formatter = new google.visualization.NumberFormat(
+      	    {fractionDigits: 2 });
+            formatter.format(data, 0);
+            formatter.format(data, 1);
+	        formatter.format(data, 2);
+	        formatter.format(data, 3);
+	        formatter.format(data, 4);
+            formatter.format(data, 5);
+
+	  var options = {
+	      title: 'Environment Chart ' + 'Frame ' + pageParam[1] + ' - ' + new Date(results[0].timestamp).toLocaleDateString() + " at " + new Date(results[0].timestamp).toLocaleTimeString() + "\n\n" + "Avg Temp - " + avgTemp.toFixed(2) + ", " + "Avg Dew 			Point - " + avgDP.toFixed(2) + ", " + "Avg Humidity - " + avgHumid.toFixed(2),
+          height: 900,
+	  curveType: 'function',
+          series: {
+            0: { color: '#6f9654' },
+            1: { color: '#1c91c0' },
+	    2: { color: '#e19999' },
+	    3: { color: '#ffff00' },
+	    4: { color: '#F2D4D4' },
+            },
+	    vAxis: { 
+              title: "Temp, Dew Point, Humidity", 
+              viewWindowMode:'explicit',
+              viewWindow:{
+                max:90,
+                min:30
+              }
+            }
+          };
+
+          var chart = new google.visualization.LineChart($('#chart').get(0));
+
+          chart.draw(data, options );
+
+        });
+      }
+
+
+      // load chart lib
       //google.load('visualization', '1', {packages: ['corechart','table']});
       //google.charts.load('visualization', '1', {packages: ['corechart','table']});
       //google.charts.load('current', {packages: ['corechart']});
-              
-                    // call drawChart once google charts is loaded
-                    //google.charts.setOnLoadCallback(drawChart);
-                    //setInterval(drawChart, 10000);
-                   
-                   //google.charts.setOnLoadCallback(drawTable);
-                 
+
+      // call drawChart once google charts is loaded
+      //google.charts.setOnLoadCallback(drawChart);
+      //setInterval(drawChart, 10000);
+      
+     //google.charts.setOnLoadCallback(drawTable);
+    
 	function drawTable() {
 
        if(gate == false) return;
-             
-                     // JSONP request
+
+        // JSONP request
         var jsonData = $.ajax({
-                        url: 'https://api.thingspeak.com/channels/345722/feeds.json?api_key=NHUR2H1DK7FOXI24&field1&results=50,callback=results',
-                   //url: 'https://api.thingspeak.com/channels/345722/feeds.json?api_key=6GKXEBQK5KNGHY7A&results=50,callback=results',
-                       //url: 'https://data.sparkfun.com/output/' + public_key + '.json',
-                   //url: 'http://50.243.227.82:8080/output/' + public_key  + '.json',
+	   url: 'https://api.thingspeak.com/channels/345722/feeds.json?api_key=NHUR2H1DK7FOXI24&field1&results=50,callback=results',
+	  //url: 'https://api.thingspeak.com/channels/345722/feeds.json?api_key=6GKXEBQK5KNGHY7A&results=50,callback=results',
+          //url: 'https://data.sparkfun.com/output/' + public_key + '.json',
+	  //url: 'http://50.243.227.82:8080/output/' + public_key  + '.json',
           //data: {page: 1},
 	  data: {page:pageParam[1]},
-                        dataType: 'jsonp',
+          dataType: 'jsonp',
         }).done(function (results) {
 
           var data = new google.visualization.DataTable();
-          
-                    data.addColumn('datetime', 'Date, Time');
-                    data.addColumn('number', 'Temp');
-                data.addColumn('number', 'Dew Point');
-                    data.addColumn('number', 'Humidity');
-                    data.addColumn('number', 'Light');
-                data.addColumn('number', 'Pressure');
-          
-               
-          
+
+          data.addColumn('datetime', 'Date, Time');
+          data.addColumn('number', 'Temp');
+	  data.addColumn('number', 'Dew Point');
+          data.addColumn('number', 'Humidity');
+    	  data.addColumn('number', 'Light');
+	  data.addColumn('number', 'Pressure');
+
+	  
+
           $.each(results, function (i, row) {
-                        data.addRow([
-                            (new Date(row.field1)),
-                            parseFloat(row.field2),
-                            parseFloat(row.field3),
-                            parseFloat(row.field4),
-                            parseFloat(row.field5),
-                            parseFloat(row.field6)
-                        ]);
-                  });
-                
-                var table = new google.visualization.Table(document.getElementById('table_div'));
-        
-            var formatter = new google.visualization.NumberFormat(
+            data.addRow([
+              (new Date(row.field1)),
+              parseFloat(row.field2),
+              parseFloat(row.field3),
+              parseFloat(row.field4),
+              parseFloat(row.field5),
+              parseFloat(row.field6)
+            ]);
+          });
+         
+        var table = new google.visualization.Table(document.getElementById('table_div'));
+
+	var formatter = new google.visualization.NumberFormat(
       	  {fractionDigits: 2 });
-                formatter.format(data, 1);
-                formatter.format(data, 2);
-            formatter.format(data, 3);
-            formatter.format(data, 4);
-            formatter.format(data, 5);
-      
+          formatter.format(data, 1);
+          formatter.format(data, 2);
+	  formatter.format(data, 3);
+	  formatter.format(data, 4);
+	  formatter.format(data, 5);
+
         table.draw(data, {showRowNumber: true, width: '100%', height: '100%'});
-                 
-                    });
-                  }
-                  google.charts.setOnLoadCallback(drawTable);
-                  setInterval(drawTable, 10000);
-            
-                  function onFrameSelect()
+      
+        });
+      }
+      google.charts.setOnLoadCallback(drawTable);
+      setInterval(drawTable, 10000);
+
+      function onFrameSelect()
       {
-                        window.alert("Select1");
-                          alert("Select1");
-                        var index = document.getElementById("Select1");
-                        pageParam[1] = index.value;
-                        drawChart();
-                    }
-                   
-                
+	  window.alert("Select1");
+     	  alert("Select1");
+          var index = document.getElementById("Select1");
+          pageParam[1] = index.value;
+          drawChart();
+      }
+      
+   
     </script>
 
   </head>
-            <body>
-                <select id="Select1" onChange="onFrameSelect();" onselect="onFrameSelect();">
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                    <option value="6">6</option>
-                    <option value="7">7</option>
-                    <option value="8">8</option>
-                    <option value="9">9</option>
-                    <option value="10">10</option>
-                </select>
-                <div id="chart" style="width: 100%;"></div>
-                <div id="table_div" style="width: 90%;"></div>
-            </body>
+  <body>
+      <select id="Select1" onChange="onFrameSelect();" onselect="onFrameSelect();">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+          <option value="7">7</option>
+          <option value="8">8</option>
+          <option value="9">9</option>
+          <option value="10">10</option>
+      </select>
+    <div id="chart" style="width: 100%;"></div>
+    <div id="table_div" style="width: 90%;"></div>
+ </body>
 </html>
+
