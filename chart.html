@@ -52,6 +52,8 @@
          dataType: 'jsonp',
          }).done(function (results) {
           var data = new google.visualization.DataTable();
+		 alert(results)
+		alert(results.field1)
           data.addColumn('datetime', 'field1');
           data.addColumn('number', 'field2 ' + parseFloat(feeds[0].field2).toFixed(2) + '°F');		
 	      data.addColumn('number', 'field3' + parseFloat(feeds[0].field3).toFixed(2) + '°F');
