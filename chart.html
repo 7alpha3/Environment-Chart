@@ -43,7 +43,7 @@
 	 
 	     
 	 $.ajax({
-	    url: " https://api.thingspeak.com/channels/345722/feeds.json?results=2",
+	     url: 'https://api.thingspeak.com/channels/345722/feeds.json?api_key=NHUR2H1DK7FOXI24&field1&results=2,
 	   dataType: "json",
 	   cache: false,
 	   error: function(xhr, ajaxOptions, thrownError) {
@@ -185,7 +185,7 @@
       }
 
       // load chart lib
-      google.load('visualization', '1', {
+      google.charts.load('visualization', '1', {
         packages: ['corechart','table']
       });
 
