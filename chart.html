@@ -13,14 +13,13 @@
 
     <!-- EXAMPLE SCRIPT -->
     <script>
-	window.alert("START");
-     alert("START");
+     //alert("START");
      var public_key = 'KJn6ywN5K1FM2dGlazjl';
      var gate = false;
      var parameters = location.search.substring(1).split("&");
-     alert(parameters);
+     //alert(parameters);
      var pageParam = parameters[1].split("=");  
-     alert("pageParam "+ pageParam[1]);
+     //alert("pageParam "+ pageParam[1]);
 
      var temp = parameters[0].split("=");  
      //alert("temp " +temp[1]);
@@ -38,7 +37,7 @@
      // onload callback
      function drawChart()
      {
-	 alert("drawChart()");
+	 //alert("drawChart()");
 	     
          if (gate == false) return;
 
