@@ -52,10 +52,10 @@
           var data = new google.visualization.DataTable();
           data.addColumn('datetime', 'field1');
           data.addColumn('number', 'field2 ' + parseFloat(results[0].temp).toFixed(2) + '°F');		
-	      data.addColumn('number', 'Dew Point ' + parseFloat(results[0].dewpoint).toFixed(2) + '°F');
-          data.addColumn('number', 'Humidity ' + parseFloat(results[0].humidity).toFixed(2) + '%');
-	      data.addColumn('number', 'Avg Temp ' + '°F');
-	      data.addColumn('number', 'Avg Humidity ' + '%');
+	      data.addColumn('number', 'field3' + parseFloat(results[0].dewpoint).toFixed(2) + '°F');
+          data.addColumn('number', 'field4' + parseFloat(results[0].humidity).toFixed(2) + '%');
+	      //data.addColumn('number', 'Avg Temp ' + '°F');
+	      //data.addColumn('number', 'Avg Humidity ' + '%');
 
 	      var avgTemp = 0.00;
 	      var sumTemp = 0.00;
