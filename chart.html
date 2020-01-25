@@ -41,14 +41,15 @@
 	     
          if (gate == false) return;
 
-	     
-	     $.getJSON('https://api.thingspeak.com/channels/345722/feeds.jsonapi_key=NHUR2H1DK7FOXI24&field1&results=50?callback=?', function(result) {
-console.log(result);
-$.each(result, function(i, field){
-$("div").append(field + " ");
-});
-});
-	     
+	$.getJSON('https://api.thingspeak.com/channels/345722/feeds.jsonapi_key=NHUR2H1DK7FOXI24&field1&results=50?callback=?', function(result) {
+		console.log(result);
+		$.each(result, function(i, field){
+		$("div").append(field + " ");
+		alert(results.field1);
+		});
+		});
+	 alert(results)
+	alert(results.field1)     
          // JSONP request
          var jsonData = $.ajax({
          
@@ -60,8 +61,6 @@ $("div").append(field + " ");
          dataType: 'jsonp',
          }).done(function (results) {
           var data = new google.visualization.DataTable();
-		 alert(results)
-		alert(results.field1)
           data.addColumn('datetime', 'field1');
           data.addColumn('number', 'field2 ' + parseFloat(feeds[0].field2).toFixed(2) + '°F');		
 	      data.addColumn('number', 'field3' + parseFloat(feeds[0].field3).toFixed(2) + '°F');
