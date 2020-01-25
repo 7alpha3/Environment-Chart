@@ -54,9 +54,9 @@
          }).done(function (results) {
           var data = new google.visualization.DataTable();
           data.addColumn('datetime', 'field1');
-          data.addColumn('number', 'field2 ' + parseFloat(results[0].field2).toFixed(2) + '°F');		
-	      data.addColumn('number', 'field3' + parseFloat(results[0].field3).toFixed(2) + '°F');
-          data.addColumn('number', 'field4' + parseFloat(results[0].field4).toFixed(2) + '%');
+          data.addColumn('number', 'field2 ' + parseFloat(feeds[0].field2).toFixed(2) + '°F');		
+	      data.addColumn('number', 'field3' + parseFloat(feeds[0].field3).toFixed(2) + '°F');
+          data.addColumn('number', 'field4' + parseFloat(feeds[0].field4).toFixed(2) + '%');
 	      //data.addColumn('number', 'Avg Temp ' + '°F');
 	      //data.addColumn('number', 'Avg Humidity ' + '%');
 
