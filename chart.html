@@ -54,9 +54,9 @@
          }).done(function (results) {
           var data = new google.visualization.DataTable();
           data.addColumn('datetime', 'field1');
-          data.addColumn('number', 'field2 ' + parseFloat(results[0].temp).toFixed(2) + '°F');		
-	      data.addColumn('number', 'field3' + parseFloat(results[0].dewpoint).toFixed(2) + '°F');
-          data.addColumn('number', 'field4' + parseFloat(results[0].humidity).toFixed(2) + '%');
+          data.addColumn('number', 'field2 ' + parseFloat(results[0].field2).toFixed(2) + '°F');		
+	      data.addColumn('number', 'field3' + parseFloat(results[0].field3).toFixed(2) + '°F');
+          data.addColumn('number', 'field4' + parseFloat(results[0].field4).toFixed(2) + '%');
 	      //data.addColumn('number', 'Avg Temp ' + '°F');
 	      //data.addColumn('number', 'Avg Humidity ' + '%');
 
@@ -203,12 +203,12 @@
 
           $.each(results, function (i, row) {
             data.addRow([
-              (new Date(row.timestamp)),
-              parseFloat(row.temp),
-              parseFloat(row.dewpoint),
-              parseFloat(row.humidity),
-              parseFloat(row.light),
-              parseFloat(row.pressure)
+              (new Date(row.field1)),
+              parseFloat(row.field2),
+              parseFloat(row.field3),
+              parseFloat(row.field4),
+              parseFloat(row.field5),
+              parseFloat(row.field6)
             ]);
           });
          
