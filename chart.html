@@ -72,8 +72,8 @@ url:'https://api.thingspeak.com/channels/345722/feed.json?api_key=NHUR2H1DK7FOXI
           var data = new google.visualization.DataTable();
               data.addColumn('datetime', 'Time');
               data.addColumn('number', 'Temp' );		
-	      data.addColumn('number', 'field4' );
-              data.addColumn('number', 'field5' );
+	      data.addColumn('number', 'Humidity' );
+              data.addColumn('number', 'Dew Point' );
 	      data.addColumn('number', 'field6');
 	      data.addColumn('number', 'field7');
 
@@ -222,10 +222,11 @@ url:'https://api.thingspeak.com/channels/345722/feed.json?api_key=NHUR2H1DK7FOXI
 
           data.addColumn('datetime', 'Date, Time');
           data.addColumn('number', 'Temp');
-	  data.addColumn('number', 'Dew Point');
           data.addColumn('number', 'Humidity');
-    	  data.addColumn('number', 'Light');
+	  data.addColumn('number', 'Dew Point');
 	  data.addColumn('number', 'Pressure');
+    	  data.addColumn('number', 'Light');
+	  
 
 
           $.each(results.feeds, function (i, row) {	     
