@@ -46,21 +46,18 @@
           gate = false;
      }
 
-
-
-
      // onload callback
      function drawChart()
      {
 	 //alert("drawChart()");
 
          if (gate == false) return;
-    var timestamp
-    var time
+        var timestamp
+        var time
 
          // JSONP request
          var jsonData = $.ajax({
-             url: 'https://api.thingspeak.com/channels/345722/feed.json?api_key=NHUR2H1DK7FOXI24&results=500,callback=results',
+             url: 'https://api.thingspeak.com/channels/345722/feed.json?api_key=NHUR2H1DK7FOXI24&results=250,callback=results',
 
             data: {page: "1"},
 	        //data: {page:pageParam[1]},
@@ -72,82 +69,36 @@
             data.addColumn('number', 'Temp' );
 	        data.addColumn('number', 'Humidity' );
             data.addColumn('number', 'Dew Point' );
-	        data.addColumn('number', 'field6');
-	        data.addColumn('number', 'field7');
+	        //data.addColumn('number', 'field6');
+	        //data.addColumn('number', 'field7');
 
 	      var avgTemp = 0.00;
-	      var sumTemp = 0.00;
+          var sumTemp = 0.00;
+          var tempArray = [];
 	      var avgDP = 0.0;
           var sumDP = 0.0;
+          var DpArray = [];
 	      var avgHumid = 0.0;
- 	      var sumHumid = 0.0;
+          var sumHumid = 0.0;
+          var humidArray = [];
+
 
           $.each(results.feeds, function (i, row) {
 
-
-/*
-            //sumDP += parseFloat(row.dewpoint);
-            //avgDP = sumDP/(i+1);
-	        //sumHumid += parseFloat(row.humidity);
-	        //avgHumid = sumHumid/(i+1);
-	        //sumTemp += parseFloat(row.temp);
-
-		    //alert("temp " + parseFloat(results[0].field1));
-		    //alert("temp " + parseFloat(results[0].field3));
-
-	        if (i < 12)
-	        {
-	            avgTemp = 0;
-                subTemp = 0;
-		        if(results[0]){ avgTemp += parseFloat(results[0].temp); subTemp = avgTemp/1;}
- 		        if(results[1]){ avgTemp += parseFloat(results[1].temp); subTemp = avgTemp/2;}
-		        if(results[2]){ avgTemp += parseFloat(results[2].temp); subTemp = avgTemp/3;}
- 		        if(results[3]){ avgTemp += parseFloat(results[3].temp); subTemp = avgTemp/4;}
-		        if(results[4]){ avgTemp += parseFloat(results[4].temp); subTemp = avgTemp/5;}
-		        if(results[5]){ avgTemp += parseFloat(results[5].temp); subTemp = avgTemp/6;}
-		        if(results[6]){ avgTemp += parseFloat(results[6].temp); subTemp = avgTemp/7;}
- 		        if(results[7]){ avgTemp += parseFloat(results[7].temp); subTemp = avgTemp/8;}
-		        if(results[8]){ avgTemp += parseFloat(results[8].temp); subTemp = avgTemp/9;}
- 		        if(results[9]){ avgTemp += parseFloat(results[9].temp); subTemp = avgTemp/10;}
-		        if(results[10]){ avgTemp += parseFloat(results[10].temp); subTemp = avgTemp/11;}
-		        if(results[11]){ avgTemp += parseFloat(results[11].temp); subTemp = avgTemp/12;}
-		        avgTemp = subTemp;
-            }else
-	        {
-	            avgTemp = sumTemp/(i+1);
-	        }
-
-	        if( i < 12 )
-	        {
-		        avgHumid = 0;
-                subHumid = 0;
-		        if(results[0]){ avgHumid += parseFloat(results[0].humidity); subHumid = avgHumid/1;}
- 		        if(results[1]){ avgHumid += parseFloat(results[1].humidity); subHumid = avgHumid/2;}
-		        if(results[2]){ avgHumid += parseFloat(results[2].humidity); subHumid = avgHumid/3;}
- 		        if(results[3]){ avgHumid += parseFloat(results[3].humidity); subHumid = avgHumid/4;}
-		        if(results[4]){ avgHumid += parseFloat(results[4].humidity); subHumid = avgHumid/5;}
-		        if(results[5]){ avgHumid += parseFloat(results[5].humidity); subHumid = avgHumid/6;}
-		        if(results[6]){ avgHumid += parseFloat(results[6].humidity); subHumid = avgHumid/7;}
- 		        if(results[7]){ avgHumid += parseFloat(results[7].humidity); subHumid = avgHumid/8;}
-		        if(results[8]){ avgHumid += parseFloat(results[8].humidity); subHumid = avgHumid/9;}
- 		        if(results[9]){ avgHumid += parseFloat(results[9].humidity); subHumid = avgHumid/10;}
-		        if(results[10]){ avgHumid += parseFloat(results[10].humidity); subHumid = avgHumid/11;}
-		        if(results[11]){ avgHumid += parseFloat(results[11].humidity); subHumid = avgHumid/12;}
-		        avgHumid = subHumid;
-            }
-
-*/
-	        //alert( row.field2 + " " + row.field3 + " " + row.field4 + " " + row.field5 );
 	        timestamp = new Date(row.field1 + ":" + row.field2 );
-	        time = row.field2;
+              time = row.field2;
+
+              tempArray.push(row.field3);
+              humidArray.push(row.field4);
+              DpArray.push(row.field5);
 
             data.addRow([
                 (new Date(row.field1 + ":" + row.field2 )),
                 parseFloat(row.field3),
 	            parseFloat(row.field4),
-                parseFloat(row.field5),
-	            parseFloat(row.field6),
-	            parseFloat(row.field6)
+                parseFloat(row.field5)//,
+	            //parseFloat(row.field6),
+	            //parseFloat(row.field6)
             ]);
 
         });
@@ -159,12 +110,32 @@
                 formatter.format(data, 1);
 	            formatter.format(data, 2);
 	            formatter.format(data, 3);
-	            formatter.format(data, 4);
-                formatter.format(data, 5);
+	            //formatter.format(data, 4);
+                //formatter.format(data, 5);
         //new Date(results[0].timestamp).toLocaleDateString() + " at " + new Date		(results//[0].timestamp).toLocaleTimeString()
+
+             tempArray = tempArray.slice(-20);
+             tempArray.forEach(function (item) {
+                 sumTemp += Number(item);
+             });
+             avgTemp = sumTemp / tempArray.length;
+
+             humidArray = humidArray.slice(-20);
+             humidArray.forEach(function (item) {
+                 sumHumid += Number(item);
+             });
+             avgHumid = sumHumid / humidArray.length;
+
+             DpArray = DpArray.slice(-20);
+             DpArray.forEach(function (item) {
+                 sumDP += Number(item);
+             });
+             avgDP = sumDP / DpArray.length;
+         
+
 	     var options = {
-	        title: 'Environment Chart ' + 'Frame ' + pageParam[1] + ' - ' + timestamp  + " at " + time + "\n\n" + "Avg Temp - " + avgTemp.toFixed(2) + ", " + "Avg Dew 			Point - " + avgDP.toFixed(2) + ", " + "Avg Humidity - " + avgHumid.toFixed(2),
-            height: 900,
+	        title: 'Environment Chart ' + 'Frame ' + pageParam[1] + ' - ' + timestamp  + " at " + time + "\n\n" + "Avg Temp - " + avgTemp.toFixed(2) + ", " + "Avg Dew Point - " + avgDP.toFixed(2) + ", " + "Avg Humidity - " + avgHumid.toFixed(2),
+            height: 800,
 	        curveType: 'function',
             series: {
             0: { color: '#6f9654' },
@@ -178,7 +149,7 @@
               viewWindowMode:'explicit',
               viewWindow:{
                 max:90,
-                min:30
+                min:20
               }
             }
           };
@@ -195,11 +166,9 @@
       //google.load('visualization', '1', {packages: ['corechart','table']});
       //google.charts.load('visualization', '1', {packages: ['corechart','table']});
       //google.charts.load('current', {packages: ['corechart']});
-
       // call drawChart once google charts is loaded
       //google.charts.setOnLoadCallback(drawChart);
       //setInterval(drawChart, 10000);
-
      //google.charts.setOnLoadCallback(drawTable);
 
 	function drawTable() {
