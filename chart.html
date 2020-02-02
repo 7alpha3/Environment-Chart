@@ -28,16 +28,21 @@
      //alert("START");
      var public_key = 'KJn6ywN5K1FM2dGlazjl';
      var gate = false;
-     var parameters = location.search.substring(1).split("&");
-     //alert(parameters);
-     var pageParam = parameters[1].split("=");
-     //alert("pageParam "+ pageParam[1]);
+        var parameters = location.search.substring(1).split("&");
+        if (parameters[0] == null) {
+            alert("Not Valid : No Parameters");
+        }
+        else {
+            var temp = parameters[0].split("=");
+            if (parameters[1] == null) {
+                alert("Not Valid : Missing Parameter");
+            }
+            else {
+                var pageParam = parameters[1].split("=");
+            }
+        }
 
-     var temp = parameters[0].split("=");
-     //alert("temp " +temp[1]);
-
-
-     if(temp[1] == '2202')
+     if(temp[1] == '2202' )
      {
           gate = true;
      }
@@ -52,13 +57,16 @@
 	 //alert("drawChart()");
 
          if (gate == false) return;
-        var timestamp
-        var time
+            var timestamp
+         var time
+
+         var nResults = 50 * Number(pageParam.slice(1));
+
+         var tsurl = 'https://api.thingspeak.com/channels/345722/feed.json?api_key=NHUR2H1DK7FOXI24&results=' + nResults + ',callback=results'
 
          // JSONP request
          var jsonData = $.ajax({
-             url: 'https://api.thingspeak.com/channels/345722/feed.json?api_key=NHUR2H1DK7FOXI24&results=250,callback=results',
-
+            url: tsurl,
             data: {page: "1"},
 	        //data: {page:pageParam[1]},
             dataType: 'jsonp',
@@ -148,8 +156,8 @@
               title: "Temp, Dew Point, Humidity",
               viewWindowMode:'explicit',
               viewWindow:{
-                max:90,
-                min:20
+                max:100,
+                min:25
               }
             }
           };
@@ -161,15 +169,6 @@
         });
       }
 
-
-      // load chart lib
-      //google.load('visualization', '1', {packages: ['corechart','table']});
-      //google.charts.load('visualization', '1', {packages: ['corechart','table']});
-      //google.charts.load('current', {packages: ['corechart']});
-      // call drawChart once google charts is loaded
-      //google.charts.setOnLoadCallback(drawChart);
-      //setInterval(drawChart, 10000);
-     //google.charts.setOnLoadCallback(drawTable);
 
 	function drawTable() {
 
