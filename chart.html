@@ -219,7 +219,7 @@
 
         });
       }
-    google.charts.setOnLoadCallback(drawTable);
+    //google.charts.setOnLoadCallback(drawTable);
     setInterval(drawTable, 10000);
 
     function onFrameSelect()
@@ -260,7 +260,7 @@
 
     function wrapTable() {    
         document.getElementById('wrapper').style.height =
-        document.getElementById('chart').clientHeight + 'px';    
+        document.getElementById('chart').clientHeight + document.getElementById('table').clientHeight  + 'px';    
     }
 
     </script>
