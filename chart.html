@@ -16,8 +16,9 @@
 
      google.charts.load('current', {'packages':['table']});
      google.charts.load('current', {'packages':['corechart','table']});
-     google.charts.setOnLoadCallback(drawChart);
-     google.charts.setOnLoadCallback(drawTable);
+     //google.charts.setOnLoadCallback(drawChart);
+     //google.charts.setOnLoadCallback(drawTable);
+     google.setOnLoadCallback(new Function("", "drawChart(); drawTable(); wrapTable();"));
 
      //google.charts.load('current', {'packages':['table']});
      //google.charts.setOnLoadCallback(drawTable);
@@ -257,6 +258,10 @@
         });
     }
 
+    function wrapTable() {    
+        document.getElementById('wrapper').style.height =
+        document.getElementById('chart').clientHeight + 'px';    
+    }
 
     </script>
 
