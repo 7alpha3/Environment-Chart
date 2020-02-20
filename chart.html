@@ -16,8 +16,9 @@
 
      google.charts.load('current', {'packages':['table']});
      google.charts.load('current', {'packages':['corechart','table']});
-     google.charts.setOnLoadCallback(drawChart);
-     google.charts.setOnLoadCallback(drawTable);
+     //google.charts.setOnLoadCallback(drawChart);
+     //google.charts.setOnLoadCallback(drawTable);
+     google.setOnLoadCallback(new Function("", "drawChart(); drawTable(); wrapTable();"));
 
      //google.charts.load('current', {'packages':['table']});
      //google.charts.setOnLoadCallback(drawTable);
@@ -218,7 +219,7 @@
 
         });
       }
-    google.charts.setOnLoadCallback(drawTable);
+    //google.charts.setOnLoadCallback(drawTable);
     setInterval(drawTable, 10000);
 
     function onFrameSelect()
@@ -257,6 +258,10 @@
         });
     }
 
+    function wrapTable() {    
+        document.getElementById('wrapper').style.height =
+        document.getElementById('chart').clientHeight + document.getElementById('table').clientHeight  + 'px';    
+    }
 
     </script>
 
@@ -277,7 +282,17 @@
         <option value="10">10</option>
     </select>
 
-    <div id="chart" style="width: 100%;"></div>
-    <div id="table_div" style="width: 90%;"></div>
+	
+	
+    //<div class="spacer"></div>
+    <div id="wrapper">
+         <div id="chart" style="width: 100%;"></div>
+         <div id="table_div" style="width: 90%;"></div>
+    </div> 
+    //<div class="spacer"></div>
+
+	
+    //<div id="chart" style="width: 100%;"></div>
+    //<div id="table_div" style="width: 90%;"></div>
 </body>
 </html>
