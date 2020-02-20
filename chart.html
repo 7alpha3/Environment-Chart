@@ -2,269 +2,232 @@
 <html>
 <head>
     <title>Environment Chart</title>
-    <meta http-equiv='refresh' content='600'>
-
-    <!-- EXTERNAL LIBS-->
+    <!--<meta http-equiv='refresh' content='600'>-->
+    <!--EXTERNAL LIBS-->
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src="https://www.google.com/jsapi"></script>
-
     <script>
-
-    <!-- EXAMPLE SCRIPT -->
-
-     google.charts.load('current', {'packages':['table']});
-     google.charts.load('current', {'packages':['corechart','table']});
-     //google.charts.setOnLoadCallback(drawChart);
-     //google.charts.setOnLoadCallback(drawTable);
-     google.setOnLoadCallback(new Function("", "drawChart(); drawTable(); wrapTable();"));
-
-     //google.charts.load('current', {'packages':['table']});
-     //google.charts.setOnLoadCallback(drawTable);
-
-     setInterval(drawChart, 10000);
-     setInterval(drawTable, 10000);
-
-     //alert("START");
-     var public_key = 'KJn6ywN5K1FM2dGlazjl';
-     var gate = false;
+        google.charts.load('current', { 'packages': ['table'] });
+        google.charts.load('current', { 'packages': ['corechart', 'table'] });
+        //google.charts.setOnLoadCallback(drawChart);
+        //google.charts.setOnLoadCallback(drawTable);
+        google.setOnLoadCallback(new Function("", "drawChart(); drawTable(); getDeviceState(); wrapTable();"));
+        //google.charts.load('current', {'packages':['table']});
+        //google.charts.setOnLoadCallback(drawTable);
+        setInterval(drawChart, 10000);
+        setInterval(drawTable, 10000);
+        setInterval(getDeviceState, 10000);
+        //alert("START");
+        var public_key = 'KJn6ywN5K1FM2dGlazjl';
+        var gate = false;
         var parameters = location.search.substring(1).split("&");
+        var device_mode = "";
         if (parameters[0] == null) {
             alert("Not Valid : No Parameters");
-        }
-        else {
+        } else {
             var temp = parameters[0].split("=");
             if (parameters[1] == null) {
                 alert("Not Valid : Missing Parameter");
-            }
-            else {
+            } else {
                 var pageParam = parameters[1].split("=");
             }
         }
-
-     if(temp[1] == '2202' )
-     {
-          gate = true;
-     }
-     else
-     {
-          gate = false;
-     }
-
-     // onload callback
-     function drawChart()
-     {
-	 //alert("drawChart()");
-
-         if (gate == false) return;
+        if (temp[1] == '2202') {
+            gate = true;
+        } else {
+            gate = false;
+        }
+        // onload callback
+        function drawChart() {
+            //alert("drawChart()");
+            if (gate == false) return;
             var timestamp
-         var time
+            var time
+            var nResults = 50 * Number(pageParam.slice(1));
+            var tsurl = 'https://api.thingspeak.com/channels/345722/feed.json?api_key=NHUR2H1DK7FOXI24&results=' + nResults + ',callback=results'
+            // JSONP request
+            var jsonData = $.ajax({
+                url: tsurl,
+                data: { page: "1" },
+                //data: {page:pageParam[1]},
+                dataType: 'jsonp',
+            }).done(function (results) {
+                var data = new google.visualization.DataTable();
+                data.addColumn('datetime', 'Time');
+                data.addColumn('number', 'Temp');
+                data.addColumn('number', 'Humidity');
+                data.addColumn('number', 'Dew Point');
+                //data.addColumn('number', 'field6');
+                //data.addColumn('number', 'field7');
+                var avgTemp = 0.00;
+                var sumTemp = 0.00;
+                var tempArray = [];
+                var avgDP = 0.0;
+                var sumDP = 0.0;
+                var DpArray = [];
+                var avgHumid = 0.0;
+                var sumHumid = 0.0;
+                var humidArray = [];
+                $.each(results.feeds, function (i, row) {
+                    timestamp = new Date(row.field1 + ":" + row.field2);
+                    time = row.field2;
+                    tempArray.push(row.field3);
+                    humidArray.push(row.field4);
+                    DpArray.push(row.field5);
+                    data.addRow([
+                        (new Date(row.field1 + ":" + row.field2)),
+                        parseFloat(row.field3),
+                        parseFloat(row.field4),
+                        parseFloat(row.field5)//,
+                        //parseFloat(row.field6),
+                        //parseFloat(row.field6)
+                    ]);
 
-         var nResults = 50 * Number(pageParam.slice(1));
-
-         var tsurl = 'https://api.thingspeak.com/channels/345722/feed.json?api_key=NHUR2H1DK7FOXI24&results=' + nResults + ',callback=results'
-
-         // JSONP request
-         var jsonData = $.ajax({
-            url: tsurl,
-            data: {page: "1"},
-	        //data: {page:pageParam[1]},
-            dataType: 'jsonp',
-         }).done(function (results) {
-
-          var data = new google.visualization.DataTable();
-            data.addColumn('datetime', 'Time');
-            data.addColumn('number', 'Temp' );
-	        data.addColumn('number', 'Humidity' );
-            data.addColumn('number', 'Dew Point' );
-	        //data.addColumn('number', 'field6');
-	        //data.addColumn('number', 'field7');
-
-	      var avgTemp = 0.00;
-          var sumTemp = 0.00;
-          var tempArray = [];
-	      var avgDP = 0.0;
-          var sumDP = 0.0;
-          var DpArray = [];
-	      var avgHumid = 0.0;
-          var sumHumid = 0.0;
-          var humidArray = [];
-
-
-          $.each(results.feeds, function (i, row) {
-
-	        timestamp = new Date(row.field1 + ":" + row.field2 );
-              time = row.field2;
-
-              tempArray.push(row.field3);
-              humidArray.push(row.field4);
-              DpArray.push(row.field5);
-
-            data.addRow([
-                (new Date(row.field1 + ":" + row.field2 )),
-                parseFloat(row.field3),
-	            parseFloat(row.field4),
-                parseFloat(row.field5)//,
-	            //parseFloat(row.field6),
-	            //parseFloat(row.field6)
-            ]);
-
-        });
-	        //data.setColumnLabel(4, 'Avg Temp ' + avgTemp.toFixed(2) + '°F');
-	        //data.setColumnLabel(5, 'Avg Humid ' + avgHumid.toFixed(2) + '%');
-            var formatter = new google.visualization.NumberFormat(
-      	        {fractionDigits: 2 });
+                });
+                //data.setColumnLabel(4, 'Avg Temp ' + avgTemp.toFixed(2) + '°F');
+                //data.setColumnLabel(5, 'Avg Humid ' + avgHumid.toFixed(2) + '%');
+                var formatter = new google.visualization.NumberFormat({ fractionDigits: 2 });
                 formatter.format(data, 0);
                 formatter.format(data, 1);
-	            formatter.format(data, 2);
-	            formatter.format(data, 3);
-	            //formatter.format(data, 4);
+                formatter.format(data, 2);
+                formatter.format(data, 3);
+                //formatter.format(data, 4);
                 //formatter.format(data, 5);
-        //new Date(results[0].timestamp).toLocaleDateString() + " at " + new Date		(results//[0].timestamp).toLocaleTimeString()
+                //new Date(results[0].timestamp).toLocaleDateString() + " at " + new Date		(results//[0].timestamp).toLocaleTimeString()
+                tempArray = tempArray.slice(-20);
+                tempArray.forEach(function (item) {
+                    sumTemp += Number(item);
+                });
+                avgTemp = sumTemp / tempArray.length;
+                humidArray = humidArray.slice(-20);
+                humidArray.forEach(function (item) {
+                    sumHumid += Number(item);
+                });
+                avgHumid = sumHumid / humidArray.length;
+                DpArray = DpArray.slice(-20);
+                DpArray.forEach(function (item) {
+                    sumDP += Number(item);
+                });
+                avgDP = sumDP / DpArray.length;
+                var deviceModeString = "";
+                if (device_mode == "0") {
+                    deviceModeString = "Device Mode: Continuous";
+                } else {
+                    deviceModeString = "Device Mode: Wakeup";
+                }
+                var options = {
+                    title: 'Environment Chart ' + 'Frame ' + pageParam[1] + ' - ' + timestamp + " at " + time + "\n\n" + "Avg Temp - " + avgTemp.toFixed(2) + ", " + "Avg Dew Point - " + avgDP.toFixed(2) + ", " + "Avg Humidity - " + avgHumid.toFixed(2) + ", " + deviceModeString,
+                    height: 800,
+                    curveType: 'function',
+                    series: {
+                        0: { color: '#6f9654' },
+                        1: { color: '#1c91c0' },
+                        2: { color: '#e19999' },
+                        3: { color: '#ffff00' },
+                        4: { color: '#F2D4D4' },
+                    },
+                    vAxis: {
+                        title: "Temp, Dew Point, Humidity",
+                        viewWindowMode: 'explicit',
+                        viewWindow: {
+                            max: 100,
+                            min: 25
+                        }
+                    }
+                };
+                var chart = new google.visualization.LineChart($('#chart').get(0));
+                chart.draw(data, options);
+            });
+        }
 
-             tempArray = tempArray.slice(-20);
-             tempArray.forEach(function (item) {
-                 sumTemp += Number(item);
-             });
-             avgTemp = sumTemp / tempArray.length;
-
-             humidArray = humidArray.slice(-20);
-             humidArray.forEach(function (item) {
-                 sumHumid += Number(item);
-             });
-             avgHumid = sumHumid / humidArray.length;
-
-             DpArray = DpArray.slice(-20);
-             DpArray.forEach(function (item) {
-                 sumDP += Number(item);
-             });
-             avgDP = sumDP / DpArray.length;
-         
-
-	     var options = {
-	        title: 'Environment Chart ' + 'Frame ' + pageParam[1] + ' - ' + timestamp  + " at " + time + "\n\n" + "Avg Temp - " + avgTemp.toFixed(2) + ", " + "Avg Dew Point - " + avgDP.toFixed(2) + ", " + "Avg Humidity - " + avgHumid.toFixed(2),
-            height: 800,
-	        curveType: 'function',
-            series: {
-            0: { color: '#6f9654' },
-            1: { color: '#1c91c0' },
-	        2: { color: '#e19999' },
-	        3: { color: '#ffff00' },
-	        4: { color: '#F2D4D4' },
-            },
-	         vAxis: {
-              title: "Temp, Dew Point, Humidity",
-              viewWindowMode:'explicit',
-              viewWindow:{
-                max:100,
-                min:25
-              }
-            }
-          };
-
-          var chart = new google.visualization.LineChart($('#chart').get(0));
-
-          chart.draw(data, options );
-
-        });
-      }
-
-
-	function drawTable() {
-
-       if(gate == false) return;
-
+        function drawTable() {
+            if (gate == false) return;
             // JSONP request
-             var jsonData = $.ajax({
-            url:'https://api.thingspeak.com/channels/345722/feed.json?api_key=NHUR2H1DK7FOXI24&results=50,callback=results',
-            data: {page: "1"},
-	        //data: {page:pageParam[1]},
-            dataType: 'jsonp',
-        }).done(function (results) {
+            var jsonData = $.ajax({
+                url: 'https://api.thingspeak.com/channels/345722/feed.json?api_key=NHUR2H1DK7FOXI24&results=50,callback=results',
+                data: { page: "1" },
+                //data: {page:pageParam[1]},
+                dataType: 'jsonp',
+            }).done(function (results) {
+                var data = new google.visualization.DataTable();
+                data.addColumn('datetime', 'Date, Time');
+                data.addColumn('number', 'Temp');
+                data.addColumn('number', 'Humidity');
+                data.addColumn('number', 'Dew Point');
+                data.addColumn('number', 'Pressure');
+                data.addColumn('number', 'Light');
+                $.each(results.feeds, function (i, row) {
+                    data.addRow([
+                        (new Date(row.field1 + ":" + row.field2)),
+                        parseFloat(row.field3),
+                        parseFloat(row.field4),
+                        parseFloat(row.field5),
+                        parseFloat(row.field6),
+                        parseFloat(row.field7)
+                    ]);
+                });
+                var table = new google.visualization.Table(document.getElementById('table_div'));
+                var formatter = new google.visualization.NumberFormat({ fractionDigits: 2 });
+                formatter.format(data, 1);
+                formatter.format(data, 2);
+                formatter.format(data, 3);
+                formatter.format(data, 4);
+                formatter.format(data, 5);
+                table.draw(data, { showRowNumber: true, width: '100%', height: '100%', sortAscending: false, sortColumn: '0' });
+            });
+        }
 
-            var data = new google.visualization.DataTable();
+        function onFrameSelect() {
+            var index = document.getElementById("Select1");
+            pageParam[1] = index.value;
+            drawChart();
+        }
 
-            data.addColumn('datetime', 'Date, Time');
-            data.addColumn('number', 'Temp');
-            data.addColumn('number', 'Humidity');
-	        data.addColumn('number', 'Dew Point');
-	        data.addColumn('number', 'Pressure');
-    	    data.addColumn('number', 'Light');
+        var agenturl = 'https://agent.electricimp.com/tcZ8tuPfyJFg';
 
-
-
-          $.each(results.feeds, function (i, row) {
-	      data.addRow([
-              (new Date(row.field1+":"+row.field2)),
-	            parseFloat(row.field3),
-                parseFloat(row.field4),
-                parseFloat(row.field5),
-                parseFloat(row.field6),
-                parseFloat(row.field7)
-            ]);
-          });
-
-        var table = new google.visualization.Table(document.getElementById('table_div'));
-
-	var formatter = new google.visualization.NumberFormat(
-      	    {fractionDigits: 2 });
-            formatter.format(data, 1);
-            formatter.format(data, 2);
-	        formatter.format(data, 3);
-	        formatter.format(data, 4);
-	        formatter.format(data, 5);
-
-    table.draw(data, {showRowNumber: true, width: '100%', height: '100%', sortAscending: false, sortColumn: '0'});
-
-        });
-      }
-    //google.charts.setOnLoadCallback(drawTable);
-    setInterval(drawTable, 10000);
-
-    function onFrameSelect()
-      {
-          var index = document.getElementById("Select1");
-          pageParam[1] = index.value;
-          drawChart();
-      }
-
-    var agenturl = 'https://agent.electricimp.com/tcZ8tuPfyJFg';
-
-    function OnContinuous() {
-        var mode = 'Mode 0';
-        $.ajax({
-        url : agenturl + '/continuous',
-        type: 'POST',
-        data: JSON.stringify({ 'mode' : mode }),
-        success : function(response) {
-            if ('locale' in response) {
-                $('.locale-status span').text(response.locale);
+        function OnContinuous() {
+            var mode = 'Mode 0';
+            $.ajax({
+                url: agenturl + '/continuous',
+                type: 'POST',
+                data: JSON.stringify({ 'mode': mode }),
+                success: function (response) {
+                    if ('locale' in response) {
+                        $('.locale-status span').text(response.locale);
+                    }
                 }
-            }
-        });
-    }
-    function OnWakeup() {
-        var mode = 'Mode 1';
-        $.ajax({
-        url : agenturl + '/wakeup',
-        type: 'POST',
-        data: JSON.stringify({ 'mode' : mode }),
-        success : function(response) {
-            if ('locale' in response) {
-                $('.locale-status span').text(response.locale);
+            });
+        }
+
+        function OnWakeup() {
+            var mode = 'Mode 1';
+            $.ajax({
+                url: agenturl + '/wakeup',
+                type: 'POST',
+                data: JSON.stringify({ 'mode': mode }),
+                success: function (response) {
+                    if ('locale' in response) {
+                        $('.locale-status span').text(response.locale);
+                    }
                 }
-            }
-        });
-    }
+            });
+        }
 
-    function wrapTable() {    
-        document.getElementById('wrapper').style.height =
-        document.getElementById('chart').clientHeight + document.getElementById('table').clientHeight  + 'px';    
-    }
+        function getDeviceState() {
+            $.get(agenturl + '/state', function (data) {
+                device_mode = data.mode;
+                //alert("Data: " + data.mode);
+            });
+        }
 
+        function wrapTable() {
+            document.getElementById('wrapper').style.height = null;
+            //document.getElementById('chart').clientHeight + document.getElementById('FakeElement').clientHeight + 'px';
+            //document.getElementById('chart').clientHeight + document.getElementById('table_div').clientHeight + 'px';
+        }
     </script>
-
 </head>
 <body>
     <button type='button' id='continuous_mode' onclick='OnContinuous()'>Continuous Mode</button>
@@ -281,18 +244,13 @@
         <option value="9">9</option>
         <option value="10">10</option>
     </select>
-
-	
-	
-    //<div class="spacer"></div>
+    <div class="spacer"></div>
     <div id="wrapper">
-         <div id="chart" style="width: 100%;"></div>
-         <div id="table_div" style="width: 90%;"></div>
-    </div> 
+        <div id="chart" style="width: 100%;"></div>
+        <div id="table_div" style="width: 90%;"></div>
+    </div>
     //<div class="spacer"></div>
-
-	
     //<div id="chart" style="width: 100%;"></div>
     //<div id="table_div" style="width: 90%;"></div>
 </body>
-</html>
+    </html>
