@@ -13,17 +13,22 @@
         google.charts.load('current', { 'packages': ['corechart', 'table'] });
         //google.charts.setOnLoadCallback(drawChart);
         //google.charts.setOnLoadCallback(drawTable);
-        google.setOnLoadCallback(new Function("", "drawChart(); drawTable(); getDeviceState(); wrapTable();"));
+        google.setOnLoadCallback(new Function("", "drawChart(); drawTable(); getDeviceState();"));
         //google.charts.load('current', {'packages':['table']});
         //google.charts.setOnLoadCallback(drawTable);
-        setInterval(drawChart, 10000);
-        setInterval(drawTable, 10000);
-        setInterval(getDeviceState, 10000);
+        setInterval(drawChart, 1000);
+        setInterval(drawTable, 1000);
+        setInterval(getDeviceState, 1000);
         //alert("START");
+        const apiThingspeak = "https://api.thingspeak.com/channels/345722/";
         var public_key = 'KJn6ywN5K1FM2dGlazjl';
         var gate = false;
         var parameters = location.search.substring(1).split("&");
         var device_mode = "";
+        var deviceModeString = "";
+        var avgTemp = 0.00;
+        var avgDP = 0.0;
+        var avgHumid = 0.0;
         if (parameters[0] == null) {
             alert("Not Valid : No Parameters");
         } else {
@@ -46,7 +51,7 @@
             var timestamp
             var time
             var nResults = 50 * Number(pageParam.slice(1));
-            var tsurl = 'https://api.thingspeak.com/channels/345722/feed.json?api_key=NHUR2H1DK7FOXI24&results=' + nResults + ',callback=results'
+            var tsurl = apiThingspeak + 'feed.json?api_key=NHUR2H1DK7FOXI24&results=' + nResults + ',callback=results'
             // JSONP request
             var jsonData = $.ajax({
                 url: tsurl,
@@ -66,7 +71,7 @@
                 var tempArray = [];
                 var avgDP = 0.0;
                 var sumDP = 0.0;
-                var DpArray = [];
+                var DewPointArray = [];
                 var avgHumid = 0.0;
                 var sumHumid = 0.0;
                 var humidArray = [];
@@ -75,7 +80,7 @@
                     time = row.field2;
                     tempArray.push(row.field3);
                     humidArray.push(row.field4);
-                    DpArray.push(row.field5);
+                    DewPointArray.push(row.field5);
                     data.addRow([
                         (new Date(row.field1 + ":" + row.field2)),
                         parseFloat(row.field3),
@@ -106,19 +111,25 @@
                     sumHumid += Number(item);
                 });
                 avgHumid = sumHumid / humidArray.length;
-                DpArray = DpArray.slice(-20);
-                DpArray.forEach(function (item) {
+                DewPointArray = DewPointArray.slice(-20);
+                DewPointArray.forEach(function (item) {
                     sumDP += Number(item);
                 });
-                avgDP = sumDP / DpArray.length;
-                var deviceModeString = "";
+                avgDP = sumDP / DewPointArray.length;
                 if (device_mode == "0") {
                     deviceModeString = "Device Mode: Continuous";
                 } else {
                     deviceModeString = "Device Mode: Wakeup";
                 }
                 var options = {
-                    title: 'Environment Chart ' + 'Frame ' + pageParam[1] + ' - ' + timestamp + " at " + time + "\n\n" + "Avg Temp - " + avgTemp.toFixed(2) + ", " + "Avg Dew Point - " + avgDP.toFixed(2) + ", " + "Avg Humidity - " + avgHumid.toFixed(2) + ", " + deviceModeString,
+                    title: 'Frame ' + pageParam[1] + ' - Last Reading: ' + timestamp + "\n\n" + "Avg Temp - " + avgTemp.toFixed(2) + ", " + "Avg Dew Point - " + avgDP.toFixed(2) + ", " + "Avg Humidity - " + avgHumid.toFixed(2),
+                    titleTextStyle: {
+                        color: 'rgb(61,150,18)',
+                        fontName: 'Times New Roman',
+                        fontSize: 24,
+                        bold: 'false',
+                        italic: 'false'
+                    },
                     height: 800,
                     curveType: 'function',
                     series: {
@@ -138,7 +149,7 @@
                     }
                 };
                 var chart = new google.visualization.LineChart($('#chart').get(0));
-                chart.draw(data, options);
+                chart.draw(data, options);             
             });
         }
 
@@ -146,7 +157,7 @@
             if (gate == false) return;
             // JSONP request
             var jsonData = $.ajax({
-                url: 'https://api.thingspeak.com/channels/345722/feed.json?api_key=NHUR2H1DK7FOXI24&results=50,callback=results',
+                url: apiThingspeak + 'feed.json?api_key=NHUR2H1DK7FOXI24&results=50,callback=results',
                 data: { page: "1" },
                 //data: {page:pageParam[1]},
                 dataType: 'jsonp',
@@ -175,7 +186,7 @@
                 formatter.format(data, 3);
                 formatter.format(data, 4);
                 formatter.format(data, 5);
-                table.draw(data, { showRowNumber: true, width: '100%', height: '100%', sortAscending: false, sortColumn: '0' });
+                table.draw(data, { showRowNumber: true, width: '100%', height: '100%', sortAscending: false, sortColumn: '0' });                
             });
         }
 
@@ -218,15 +229,39 @@
         function getDeviceState() {
             $.get(agenturl + '/state', function (data) {
                 device_mode = data.mode;
+                drawChart();
                 //alert("Data: " + data.mode);
             });
         }
 
-        function wrapTable() {
-            document.getElementById('wrapper').style.height = null;
-            //document.getElementById('chart').clientHeight + document.getElementById('FakeElement').clientHeight + 'px';
-            //document.getElementById('chart').clientHeight + document.getElementById('table_div').clientHeight + 'px';
+        function updateTitle() {
+            var now = new Date();
+            var date = pad(now.getDate());
+            var month = pad(now.getMonth() + 1); //Be careful! January is 0 not 1
+            var year = now.getFullYear();
+            var dateString = month + '-' + date + '-' + year;
+            var timeString = pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds());
+            document.getElementById('title_div').innerHTML = dateString + ' | ' + timeString + ' | ' + deviceModeString;
+            document.getElementById('title_div').style.color = 'rgb(61,150,18)';
+            document.getElementById('title_div').style.fontSize = 'xx-large';
+            document.getElementById('title_div').style.font = 'Arial';
+            document.getElementById('title_div').style.textAlign = 'center';
         }
+        setInterval(updateTitle, 1000);
+
+        function pad(n) {
+        return n<10 ? '0'+n : n;
+        }
+
+        function downloadTableCSV() {
+            console.log('downloadTableCSV');
+            var csvFormattedDataTable = google.visualization.dataTableToCsv(table);
+            var encodedUri = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csvFormattedDataTable);
+            this.href = encodedUri;
+            this.download = 'table-data.csv';
+            this.target = '_blank';
+        }
+
     </script>
 </head>
 <body>
@@ -243,14 +278,21 @@
         <option value="8">8</option>
         <option value="9">9</option>
         <option value="10">10</option>
+        <option value="11">11</option>
+        <option value="12">12</option>
+        <option value="13">13</option>
+        <option value="14">14</option>
+        <option value="15">15</option>
+        <option value="16">16</option>
+        <option value="17">17</option>
+        <option value="18">18</option>
+        <option value="19">19</option>
+        <option value="20">20</option>
     </select>
-    <div class="spacer"></div>
-    <div id="wrapper">
-        <div id="chart" style="width: 100%;"></div>
-        <div id="table_div" style="width: 90%;"></div>
-    </div>
-    //<div class="spacer"></div>
-    //<div id="chart" style="width: 100%;"></div>
-    //<div id="table_div" style="width: 90%;"></div>
+    <a id="Export" onclick='downloadTableCSV()' href="#">Download as csv</a>
+    <h1 align='center' style='color:rgb(61,150,18);'>Environment Status</h1>
+    <div id='title_div'></div>
+    <div id="chart" style="width: 100%;"></div>
+    <div id="table_div" style="width: 90%;"></div>
 </body>
     </html>
