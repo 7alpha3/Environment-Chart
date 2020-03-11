@@ -7,7 +7,7 @@
     <!--EXTERNAL LIBS-->
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript"></script>
-    <script type="text/json"></script>
+    <script type="application/json"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src="https://www.google.com/jsapi"></script>
     <script>
@@ -103,21 +103,26 @@
                 //formatter.format(data, 4);
                 //formatter.format(data, 5);
                 //new Date(results[0].timestamp).toLocaleDateString() + " at " + new Date		(results//[0].timestamp).toLocaleTimeString()
-                tempArray = tempArray.slice(-20);
+                //tempArray = tempArray.slice(-20);
                 tempArray.forEach(function (item) {
                     sumTemp += Number(item);
                 });
                 avgTemp = sumTemp / tempArray.length;
-                humidArray = humidArray.slice(-20);
+                //humidArray = humidArray.slice(-20);
                 humidArray.forEach(function (item) {
                     sumHumid += Number(item);
                 });
                 avgHumid = sumHumid / humidArray.length;
-                DewPointArray = DewPointArray.slice(-20);
+                //DewPointArray = DewPointArray.slice(-20);
                 DewPointArray.forEach(function (item) {
                     sumDP += Number(item);
                 });
                 avgDP = sumDP / DewPointArray.length;
+                //cleanup arrays
+                tempArray.splice(0, tempArray.length);
+                humidArray.splice(0, humidArray.length);
+                DewPointArray.splice(0, DewPointArray.length);
+
                 if (device_mode == "0") {
                     deviceModeString = "Device Mode: Continuous";
                 } else {
@@ -151,7 +156,7 @@
                     }
                 };
                 var chart = new google.visualization.LineChart($('#chart').get(0));
-                chart.draw(data, options);             
+                chart.draw(data, options);
             });
         }
 
@@ -188,7 +193,7 @@
                 formatter.format(data, 3);
                 formatter.format(data, 4);
                 formatter.format(data, 5);
-                table.draw(data, { showRowNumber: true, width: '100%', height: '100%', sortAscending: false, sortColumn: '0' });                
+                table.draw(data, { showRowNumber: true, width: '100%', height: '100%', sortAscending: false, sortColumn: '0' });
             });
         }
 
@@ -252,7 +257,7 @@
         setInterval(updateTitle, 1000);
 
         function pad(n) {
-        return n<10 ? '0'+n : n;
+            return n < 10 ? '0' + n : n;
         }
 
         function downloadTableCSV() {
@@ -297,4 +302,4 @@
     <div id="chart" style="width: 100%;"></div>
     <div id="table_div" style="width: 90%;"></div>
 </body>
-    </html>
+</html>
