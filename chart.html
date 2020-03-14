@@ -3,34 +3,35 @@
 <head>
     <title>Environment Chart</title>
     <meta content="text/html; charset=UTF-8; X-Content-Type-Options=nosniff" http-equiv="Content-Type" />
-    <!--<meta http-equiv='refresh' content='600'>-->
+    <meta http-equiv='refresh' content='600'>
     <!--EXTERNAL LIBS-->
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+ 
+    
+    <script src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript"></script>
     <script type="application/json"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://www.google.com/jsapi"></script>
     <script>
-        google.charts.load('current', { 'packages': ['table'] });
+       
         google.charts.load('current', { 'packages': ['corechart', 'table'] });
-        //google.charts.setOnLoadCallback(drawChart);
-        //google.charts.setOnLoadCallback(drawTable);
-        google.setOnLoadCallback(new Function("", "drawChart(); drawTable(); getDeviceState();"));
-        //google.charts.load('current', {'packages':['table']});
-        //google.charts.setOnLoadCallback(drawTable);
-        setInterval(drawChart, 1000);
-        setInterval(drawTable, 1000);
-        setInterval(getDeviceState, 1000);
+        google.charts.setOnLoadCallback(drawChart);
+        google.setOnLoadCallback(new Function("", "drawChart(); drawTable();"));
+        setInterval(drawChart, 10000);
+        setInterval(drawTable, 10000);
+        setInterval(getDeviceState, 10000);
         //alert("START");
         const apiThingspeak = "https://api.thingspeak.com/channels/345722/";
         var public_key = 'KJn6ywN5K1FM2dGlazjl';
         var gate = false;
         var parameters = location.search.substring(1).split("&");
         var device_mode = "";
+        var old_device_mode = "none";
         var deviceModeString = "";
         var avgTemp = 0.00;
         var avgDP = 0.0;
         var avgHumid = 0.0;
+        var oldChart = null;
         if (parameters[0] == null) {
             alert("Not Valid : No Parameters");
         } else {
@@ -50,12 +51,11 @@
         function drawChart() {
             //alert("drawChart()");
             if (gate == false) return;
-            var timestamp
-            var time
+            var lastReadingTime;
             var nResults = 50 * Number(pageParam.slice(1));
             var tsurl = apiThingspeak + 'feed.json?api_key=NHUR2H1DK7FOXI24&results=' + nResults + ',callback=results'
             // JSONP request
-            var jsonData = $.ajax({
+            $.ajax({
                 url: tsurl,
                 data: { page: "1" },
                 //data: {page:pageParam[1]},
@@ -78,20 +78,20 @@
                 var sumHumid = 0.0;
                 var humidArray = [];
                 $.each(results.feeds, function (i, row) {
-                    timestamp = new Date(row.field1 + ":" + row.field2);
-                    time = row.field2;
                     tempArray.push(row.field3);
                     humidArray.push(row.field4);
                     DewPointArray.push(row.field5);
+                    var timestamp = new Date(row.field1 + ":" + row.field2);
                     data.addRow([
-                        (new Date(row.field1 + ":" + row.field2)),
+                        //lastReadingTime = new Date(row.field1 + ":" + row.field2),
+                        timestamp,
                         parseFloat(row.field3),
                         parseFloat(row.field4),
                         parseFloat(row.field5)//,
                         //parseFloat(row.field6),
                         //parseFloat(row.field6)
                     ]);
-
+                    lastReadingTime = timestamp;
                 });
                 //data.setColumnLabel(4, 'Avg Temp ' + avgTemp.toFixed(2) + '°F');
                 //data.setColumnLabel(5, 'Avg Humid ' + avgHumid.toFixed(2) + '%');
@@ -129,7 +129,7 @@
                     deviceModeString = "Device Mode: Wakeup";
                 }
                 var options = {
-                    title: 'Frame ' + pageParam[1] + ' - Last Reading: ' + timestamp + "\n\n" + "Avg Temp - " + avgTemp.toFixed(2) + ", " + "Avg Dew Point - " + avgDP.toFixed(2) + ", " + "Avg Humidity - " + avgHumid.toFixed(2),
+                    title: 'Frame ' + pageParam[1] + ' - Last Reading: ' + lastReadingTime + "\n\n" + "Avg Temp - " + avgTemp.toFixed(2) + ", " + "Avg Dew Point - " + avgDP.toFixed(2) + ", " + "Avg Humidity - " + avgHumid.toFixed(2),
                     titleTextStyle: {
                         color: 'rgb(61,150,18)',
                         fontName: 'Times New Roman',
@@ -155,15 +155,20 @@
                         }
                     }
                 };
-                var chart = new google.visualization.LineChart($('#chart').get(0));
+                //var chart = new google.visualization.LineChart($('#chart').get(0)); chart_div
+                var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+                chart.clearChart();
                 chart.draw(data, options);
+                data.removeRows(0, data.length);
+                
             });
         }
 
         function drawTable() {
             if (gate == false) return;
             // JSONP request
-            var jsonData = $.ajax({
+
+            $.ajax({
                 url: apiThingspeak + 'feed.json?api_key=NHUR2H1DK7FOXI24&results=50,callback=results',
                 data: { page: "1" },
                 //data: {page:pageParam[1]},
@@ -178,7 +183,7 @@
                 data.addColumn('number', 'Light');
                 $.each(results.feeds, function (i, row) {
                     data.addRow([
-                        (new Date(row.field1 + ":" + row.field2)),
+                        new Date(row.field1 + ":" + row.field2),
                         parseFloat(row.field3),
                         parseFloat(row.field4),
                         parseFloat(row.field5),
@@ -194,6 +199,7 @@
                 formatter.format(data, 4);
                 formatter.format(data, 5);
                 table.draw(data, { showRowNumber: true, width: '100%', height: '100%', sortAscending: false, sortColumn: '0' });
+                data.removeRows(0, data.length);
             });
         }
 
@@ -212,9 +218,9 @@
                 type: 'POST',
                 data: JSON.stringify({ 'mode': mode }),
                 success: function (response) {
-                    if ('locale' in response) {
-                        $('.locale-status span').text(response.locale);
-                    }
+                    console.log(mode);
+                    device_mode = "0";
+                    drawChart();
                 }
             });
         }
@@ -226,9 +232,9 @@
                 type: 'POST',
                 data: JSON.stringify({ 'mode': mode }),
                 success: function (response) {
-                    if ('locale' in response) {
-                        $('.locale-status span').text(response.locale);
-                    }
+                    console.log(mode);
+                    device_mode = "1";
+                    drawChart();
                 }
             });
         }
@@ -236,8 +242,10 @@
         function getDeviceState() {
             $.get(agenturl + '/state', function (data) {
                 device_mode = data.mode;
-                drawChart();
-                //alert("Data: " + data.mode);
+                if (device_mode != old_device_mode) {
+                    old_device_mode = device_mode;
+                    updateTitle();
+                }
             });
         }
 
@@ -254,7 +262,7 @@
             document.getElementById('title_div').style.font = 'Arial';
             document.getElementById('title_div').style.textAlign = 'center';
         }
-        setInterval(updateTitle, 1000);
+        setInterval(updateTitle, 500);
 
         function pad(n) {
             return n < 10 ? '0' + n : n;
@@ -299,7 +307,7 @@
     <a id="Export" onclick='downloadTableCSV()' href="#">Download as csv</a>
     <h1 align='center' style='color:rgb(61,150,18);'>Environment Status</h1>
     <div id='title_div'></div>
-    <div id="chart" style="width: 100%;"></div>
+    <div id="chart_div" style="width: 100%;"></div>
     <div id="table_div" style="width: 90%;"></div>
 </body>
 </html>
