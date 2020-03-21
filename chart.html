@@ -1,26 +1,30 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <link href="data:image/x-icon;base64,AAABAAEAEBAQAAEABAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAgAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAIGMCACRuAwAUOwIAHlkEACl9BAAujAQAGk8BABVCAQAZTQIANJYIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA4eUEUl4MAAIeUEiFJeAAAeQAAAAAAAACUAAAAAAAAAEEAAAAAAAAAElagAAAAAAASVqAAAAAAAEEAAAAAAAAAlAAAAAAAAAB5AAAAAAAAAIeUEiFJeAAAOHlBFJeDAAAAAAAAAAAAAAAAAAAAAAD//wAA//8AAMADAADAAwAAz/8AAM//AADP/wAAwf8AAMH/AADP/wAAz/8AAM//AADAAwAAwAMAAP//AAD//wAA" rel="icon" type="image/x-icon" />
     <title>Environment Chart</title>
     <meta content="text/html; charset=UTF-8; X-Content-Type-Options=nosniff" http-equiv="Content-Type" />
-    <meta http-equiv='refresh' content='600'>
+    <meta http-equiv='refresh' content='3600'>
     <!--EXTERNAL LIBS-->
- 
-    
-    <script src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript"></script>
-    <script type="application/json"></script>
+    <script type="application/json">
+    </script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://www.google.com/jsapi"></script>
+    <script src="https://www.google.com/jsapi"></script>
+    <script src="https://www.gstatic.com/charts/loader.js"></script>
     <script>
-       
         google.charts.load('current', { 'packages': ['corechart', 'table'] });
-        google.charts.setOnLoadCallback(drawChart);
-        google.setOnLoadCallback(new Function("", "drawChart(); drawTable();"));
+        google.charts.setOnLoadCallback(new Function("", "drawChart()"));
+        //google.charts.setOnLoadCallback(new Function("", "drawChart(); drawTable();"));
+        //google.charts.load('current', { packages: ['corechart'] });
+        //google.charts.setOnLoadCallback(drawChart);
+        //google.charts.setOnLoadCallback(drawTable);
+    </script>
+    <script>
         setInterval(drawChart, 10000);
-        setInterval(drawTable, 10000);
-        setInterval(getDeviceState, 10000);
-        //alert("START");
+        setInterval(getDeviceState, 1000);
+
         const apiThingspeak = "https://api.thingspeak.com/channels/345722/";
         var public_key = 'KJn6ywN5K1FM2dGlazjl';
         var gate = false;
@@ -32,28 +36,73 @@
         var avgDP = 0.0;
         var avgHumid = 0.0;
         var oldChart = null;
+        var oldTable = null;
+        var nSelectedIndex = 0;
+        var nDefaultWakeTime = 30;
+        var nWakeTime = 30;
+
         if (parameters[0] == null) {
             alert("Not Valid : No Parameters");
         } else {
             var temp = parameters[0].split("=");
-            if (parameters[1] == null) {
-                alert("Not Valid : Missing Parameter");
-            } else {
+            if (parameters[1] != null) {
                 var pageParam = parameters[1].split("=");
+                nSelectedIndex = Number(pageParam.slice(1));
+            } else {
+                nSelectedIndex = 1;
             }
         }
+
+        var someItem = sessionStorage.getItem("savedIndex");
+        if (someItem != null && someItem != "1") {
+            nSelectedIndex = Number(someItem);
+        }
+
+        someItem = sessionStorage.getItem("WakeTime");
+        if (someItem != null) {
+            nWakeTime = Number(someItem);
+        } else {
+            nWakeTime = nDefaultWakeTime;
+        }
+
         if (temp[1] == '2202') {
             gate = true;
         } else {
             gate = false;
         }
+
+        function selectListElement(id, valueToSelect) {
+            document.getElementById(id).selectedIndex = valueToSelect - 1;
+        }
+
         // onload callback
         function drawChart() {
-            //alert("drawChart()");
             if (gate == false) return;
+            //set inputWakeRate text
+            someItem = sessionStorage.getItem("WakeTime");
+            if (someItem != null) {
+                nWakeTime = Number(someItem);
+            } else {
+                nWakeTime = nDefaultWakeTime;
+            }
+            var e = document.getElementById("inputWakeRate");
+            e.value = nWakeTime;
+            // Get SelectIndex dropdown element from DOM
+            var dropdown = document.getElementById('SelectIndex');
+            // add elements to dropdown list
+            var len = 50;
+            if (dropdown.length < len) {
+                for (var i = 0; i < len; i++) {
+                    // Append the element to the end list
+                    var value = (i + 1).toString();
+                    dropdown[dropdown.length] = new Option(value, i + 1);
+                }
+            }
+            selectListElement("SelectIndex", nSelectedIndex);
+
             var lastReadingTime;
-            var nResults = 50 * Number(pageParam.slice(1));
-            var tsurl = apiThingspeak + 'feed.json?api_key=NHUR2H1DK7FOXI24&results=' + nResults + ',callback=results'
+            var nResults = 50 * nSelectedIndex;
+            var tsurl = apiThingspeak + 'feed.json?api_key=NHUR2H1DK7FOXI24&results=' + nResults + ',callback=results';
             // JSONP request
             $.ajax({
                 url: tsurl,
@@ -66,8 +115,6 @@
                 data.addColumn('number', 'Temp');
                 data.addColumn('number', 'Humidity');
                 data.addColumn('number', 'Dew Point');
-                //data.addColumn('number', 'field6');
-                //data.addColumn('number', 'field7');
                 var avgTemp = 0.00;
                 var sumTemp = 0.00;
                 var tempArray = [];
@@ -87,9 +134,7 @@
                         timestamp,
                         parseFloat(row.field3),
                         parseFloat(row.field4),
-                        parseFloat(row.field5)//,
-                        //parseFloat(row.field6),
-                        //parseFloat(row.field6)
+                        parseFloat(row.field5)
                     ]);
                     lastReadingTime = timestamp;
                 });
@@ -103,17 +148,17 @@
                 //formatter.format(data, 4);
                 //formatter.format(data, 5);
                 //new Date(results[0].timestamp).toLocaleDateString() + " at " + new Date		(results//[0].timestamp).toLocaleTimeString()
-                //tempArray = tempArray.slice(-20);
+                //tempArray = tempArray.slice(-50);
                 tempArray.forEach(function (item) {
                     sumTemp += Number(item);
                 });
                 avgTemp = sumTemp / tempArray.length;
-                //humidArray = humidArray.slice(-20);
+                //humidArray = humidArray.slice(-50);
                 humidArray.forEach(function (item) {
                     sumHumid += Number(item);
                 });
                 avgHumid = sumHumid / humidArray.length;
-                //DewPointArray = DewPointArray.slice(-20);
+                //DewPointArray = DewPointArray.slice(-50);
                 DewPointArray.forEach(function (item) {
                     sumDP += Number(item);
                 });
@@ -128,8 +173,15 @@
                 } else {
                     deviceModeString = "Device Mode: Wakeup";
                 }
+
+                if (nSelectedIndex == 1) {
+                    frameString = " Frame";
+                } else {
+                    frameString = " Frames";
+                }
+
                 var options = {
-                    title: 'Frame ' + pageParam[1] + ' - Last Reading: ' + lastReadingTime + "\n\n" + "Avg Temp - " + avgTemp.toFixed(2) + ", " + "Avg Dew Point - " + avgDP.toFixed(2) + ", " + "Avg Humidity - " + avgHumid.toFixed(2),
+                    title: "" + nSelectedIndex + frameString + ' - Last Reading: ' + lastReadingTime + "\n\n" + "Avg Temp - " + avgTemp.toFixed(2) + ", " + "Avg Dew Point - " + avgDP.toFixed(2) + ", " + "Avg Humidity - " + avgHumid.toFixed(2),
                     titleTextStyle: {
                         color: 'rgb(61,150,18)',
                         fontName: 'Times New Roman',
@@ -155,21 +207,24 @@
                         }
                     }
                 };
-                //var chart = new google.visualization.LineChart($('#chart').get(0)); chart_div
+                if (oldChart != null) {
+                    oldChart.clearChart();
+                }
+                //var chart = new google.visualization.LineChart($('#chart_div').get(0));
                 var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
-                chart.clearChart();
                 chart.draw(data, options);
                 data.removeRows(0, data.length);
-                
+                oldChart = chart;
+                drawTable();
             });
         }
 
         function drawTable() {
             if (gate == false) return;
             // JSONP request
-
+            var tsurl = apiThingspeak + 'feed.json?api_key=NHUR2H1DK7FOXI24&results=50,callback=results'
             $.ajax({
-                url: apiThingspeak + 'feed.json?api_key=NHUR2H1DK7FOXI24&results=50,callback=results',
+                url: tsurl,
                 data: { page: "1" },
                 //data: {page:pageParam[1]},
                 dataType: 'jsonp',
@@ -191,34 +246,36 @@
                         parseFloat(row.field7)
                     ]);
                 });
-                var table = new google.visualization.Table(document.getElementById('table_div'));
                 var formatter = new google.visualization.NumberFormat({ fractionDigits: 2 });
                 formatter.format(data, 1);
                 formatter.format(data, 2);
                 formatter.format(data, 3);
                 formatter.format(data, 4);
                 formatter.format(data, 5);
+                if (oldTable != null) {
+                    oldTable.clearChart();
+                }
+                //var table = new google.visualization.LineChart($('#table_div').get(0));
+                var table = new google.visualization.Table(document.getElementById('table_div'));
                 table.draw(data, { showRowNumber: true, width: '100%', height: '100%', sortAscending: false, sortColumn: '0' });
                 data.removeRows(0, data.length);
+                oldTable = table;
             });
-        }
-
-        function onFrameSelect() {
-            var index = document.getElementById("Select1");
-            pageParam[1] = index.value;
-            drawChart();
         }
 
         var agenturl = 'https://agent.electricimp.com/tcZ8tuPfyJFg';
 
         function OnContinuous() {
-            var mode = 'Mode 0';
+            var mode = '0';
+            nWakeTime = document.getElementById("inputWakeRate").value;
             $.ajax({
                 url: agenturl + '/continuous',
                 type: 'POST',
-                data: JSON.stringify({ 'mode': mode }),
+                data: JSON.stringify({
+                    'mode': mode,
+                    'wake': nWakeTime
+                }),
                 success: function (response) {
-                    console.log(mode);
                     device_mode = "0";
                     drawChart();
                 }
@@ -226,15 +283,42 @@
         }
 
         function OnWakeup() {
-            var mode = 'Mode 1';
+            var mode = '1';
+            nWakeTime = document.getElementById("inputWakeRate").value;
             $.ajax({
                 url: agenturl + '/wakeup',
                 type: 'POST',
-                data: JSON.stringify({ 'mode': mode }),
+                data: JSON.stringify({
+                    'mode': mode,
+                    'wake': nWakeTime
+                }),
                 success: function (response) {
-                    console.log(mode);
                     device_mode = "1";
                     drawChart();
+                }
+            });
+        }
+
+        function SetDeviceWake() {
+            e = document.getElementById("inputWakeRate");
+            nWakeTime = e.value;
+            sessionStorage.setItem("WakeTime", nWakeTime);
+            getDeviceState();
+            var mode = "";
+            if (device_mode == "0") {
+                mode = '0';
+            } else {
+                mode = '1';
+            }
+            $.ajax({
+                url: agenturl + '/setdevice',
+                type: 'POST',
+                data: JSON.stringify({
+                    'mode': device_mode,
+                    'wake': nWakeTime
+                }),
+                success: function (response) {
+                    e.value = nWakeTime;
                 }
             });
         }
@@ -242,10 +326,8 @@
         function getDeviceState() {
             $.get(agenturl + '/state', function (data) {
                 device_mode = data.mode;
-                if (device_mode != old_device_mode) {
-                    old_device_mode = device_mode;
-                    updateTitle();
-                }
+                old_device_mode = device_mode;
+                updateTitle();
             });
         }
 
@@ -255,59 +337,83 @@
             var month = pad(now.getMonth() + 1); //Be careful! January is 0 not 1
             var year = now.getFullYear();
             var dateString = month + '-' + date + '-' + year;
-            var timeString = pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds());
+            var timeString = pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds() + 1);
             document.getElementById('title_div').innerHTML = dateString + ' | ' + timeString + ' | ' + deviceModeString;
             document.getElementById('title_div').style.color = 'rgb(61,150,18)';
             document.getElementById('title_div').style.fontSize = 'xx-large';
             document.getElementById('title_div').style.font = 'Arial';
             document.getElementById('title_div').style.textAlign = 'center';
         }
-        setInterval(updateTitle, 500);
+        setInterval(updateTitle, 1000);
 
         function pad(n) {
             return n < 10 ? '0' + n : n;
         }
 
+        function sleep(milliseconds) {
+            const date = Date.now();
+            let currentDate = null;
+            do {
+                currentDate = Date.now();
+            } while (currentDate - date < milliseconds);
+        }
+
         function downloadTableCSV() {
             console.log('downloadTableCSV');
-            var csvFormattedDataTable = google.visualization.dataTableToCsv(table);
+            var csvFormattedDataTable = google.visualization.dataTableToCsv(document.getElementById('table_div'));
             var encodedUri = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csvFormattedDataTable);
             this.href = encodedUri;
             this.download = 'table-data.csv';
             this.target = '_blank';
         }
 
+        function onIndexSelect() {
+            var index = document.getElementById("SelectIndex");
+            nSelectedIndex = Number(index.value);
+            sessionStorage.setItem("savedIndex", index.value);
+            drawChart();
+        }
+
+        var timerId;
+        var debounceFunction = function (func, delay) {
+            // Cancels the setTimeout method execution
+            clearTimeout(timerId)
+            // Executes the func after delay time.
+            timerId = setTimeout(func, delay)
+        }
+
+        function OnInputWakeRate() {
+            var rate = document.getElementById("inputWakeRate");
+            if (rate.value < 1) {
+                rate.value = 1;
+            } else if (rate.value > 3600) {
+                rate.value = 3600;
+            }
+            // Fire off ajax post message to agent after delay when user stops typing or changing input
+            debounceFunction(SetDeviceWake, 2000);
+        }
+
     </script>
 </head>
 <body>
+    <span> Frames: </span>
+    <select id="SelectIndex" onChange="onIndexSelect();" onselect="onIndexSelect();"></select>
     <button type='button' id='continuous_mode' onclick='OnContinuous()'>Continuous Mode</button>
     <button type='button' id='wakeup_mode' onclick='OnWakeup()'>Wakeup Mode</button>
-    <select id="Select1" onChange="onFrameSelect();" onselect="onFrameSelect();">
-        <option value="1">1</option>
-        <option value="2">2</option>
-        <option value="3">3</option>
-        <option value="4">4</option>
-        <option value="5">5</option>
-        <option value="6">6</option>
-        <option value="7">7</option>
-        <option value="8">8</option>
-        <option value="9">9</option>
-        <option value="10">10</option>
-        <option value="11">11</option>
-        <option value="12">12</option>
-        <option value="13">13</option>
-        <option value="14">14</option>
-        <option value="15">15</option>
-        <option value="16">16</option>
-        <option value="17">17</option>
-        <option value="18">18</option>
-        <option value="19">19</option>
-        <option value="20">20</option>
-    </select>
-    <a id="Export" onclick='downloadTableCSV()' href="#">Download as csv</a>
+    <span> Wake Seconds: </span>
+    <input type="number" id="inputWakeRate" min="1" max="3600" size="4" oninput="OnInputWakeRate()">
+    <iframe align='right' src="http://free.timeanddate.com/clock/i77fanty/n5348/szw110/szh110/hoc222/hbw6/cf100/hgr0/hcw2/hcd88/fan2/fas20/fdi70/mqc000/mqs3/mql13/mqw4/mqd94/mhc000/mhs3/mhl13/mhw4/mhd94/mmc000/mml5/mmw1/mmd94/hwm2/hhs2/hhb18/hms2/hml80/hmb18/hmr7/hscf09/hss1/hsl90/hsr5" frameborder="0" width="110" height="110"></iframe>
+
+    <!--<a id="Export" onclick='downloadTableCSV()' href="#">Download as csv</a>-->
     <h1 align='center' style='color:rgb(61,150,18);'>Environment Status</h1>
     <div id='title_div'></div>
     <div id="chart_div" style="width: 100%;"></div>
-    <div id="table_div" style="width: 90%;"></div>
+    <div id="table_div" style="width: 100%;"></div>
+    <div id="scace_div" style="width: 100%;"></div>
 </body>
 </html>
+
+<a class="weatherwidget-io" href="https://forecast7.com/en/26d66n80d27/wellington/?unit=us" data-label_1="WELLINGTON" data-label_2="WEATHER" data-theme="original">WELLINGTON WEATHER</a>
+<script>
+    !function (d, s, id) { var js, fjs = d.getElementsByTagName(s)[0]; if (!d.getElementById(id)) { js = d.createElement(s); js.id = id; js.src = 'https://weatherwidget.io/js/widget.min.js'; fjs.parentNode.insertBefore(js, fjs); } }(document, 'script', 'weatherwidget-io-js');
+</script>
