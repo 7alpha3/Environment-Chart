@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <link href="data:image/x-icon;base64,AAABAAEAEBAQAAEABAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAgAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAIGMCACRuAwAUOwIAHlkEACl9BAAujAQAGk8BABVCAQAZTQIANJYIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA4eUEUl4MAAIeUEiFJeAAAeQAAAAAAAACUAAAAAAAAAEEAAAAAAAAAElagAAAAAAASVqAAAAAAAEEAAAAAAAAAlAAAAAAAAAB5AAAAAAAAAIeUEiFJeAAAOHlBFJeDAAAAAAAAAAAAAAAAAAAAAAD//wAA//8AAMADAADAAwAAz/8AAM//AADP/wAAwf8AAMH/AADP/wAAz/8AAM//AADAAwAAwAMAAP//AAD//wAA" rel="icon" type="image/x-icon" />
+   <link href="data:image/x-icon;base64,AAABAAEAEBAQAAEABAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAgAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAIGMCACRuAwAUOwIAHlkEACl9BAAujAQAGk8BABVCAQAZTQIANJYIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA4eUEUl4MAAIeUEiFJeAAAeQAAAAAAAACUAAAAAAAAAEEAAAAAAAAAElagAAAAAAASVqAAAAAAAEEAAAAAAAAAlAAAAAAAAAB5AAAAAAAAAIeUEiFJeAAAOHlBFJeDAAAAAAAAAAAAAAAAAAAAAAD//wAA//8AAMADAADAAwAAz/8AAM//AADP/wAAwf8AAMH/AADP/wAAz/8AAM//AADAAwAAwAMAAP//AAD//wAA" rel="icon" type="image/x-icon" />
     <title>Environment Data</title>
     <meta content="text/html; charset=UTF-8; X-Content-Type-Options=nosniff" http-equiv="Content-Type" />
     <meta http-equiv='refresh' content='3600'>
@@ -332,11 +332,12 @@
 
         function updateTitle() {
             var now = new Date();
+            now.setSeconds(now.getSeconds() + 1);
             var date = pad(now.getDate());
             var month = pad(now.getMonth() + 1); //Be careful! January is 0 not 1
             var year = now.getFullYear();
             var dateString = month + '-' + date + '-' + year;
-            var timeString = pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds() + 1);
+            var timeString = pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds());
             document.getElementById('title_div').innerHTML = dateString + ' | ' + timeString + ' | ' + deviceModeString;
             document.getElementById('title_div').style.color = 'rgb(61,150,18)';
             document.getElementById('title_div').style.fontSize = 'xx-large';
